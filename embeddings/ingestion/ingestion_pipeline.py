@@ -15,10 +15,6 @@ def process_document(pdf_path: str):
 
     for index, chunk in enumerate(chunks):
 
-        processed_chunks.append({
-            "chunk_id": index,
-            "source": pdf_path,
-            "text": chunk
-        })
+        processed_chunks.append({"chunk_id": index, "source": pdf_path, "text": chunk})
 
     return processed_chunks

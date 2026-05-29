@@ -9,10 +9,7 @@ def cosine_similarity(a, b):
     a = np.array(a)
     b = np.array(b)
 
-    return np.dot(a, b) / (
-        np.linalg.norm(a)
-        * np.linalg.norm(b)
-    )
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 
 vectors = []
@@ -22,10 +19,7 @@ for doc in documents:
 
     vector = get_embedding(doc)
 
-    vectors.append({
-        "text": doc,
-        "embedding": vector
-    })
+    vectors.append({"text": doc, "embedding": vector})
 
 print("Embeddings generated")
 
@@ -40,20 +34,12 @@ scores = []
 
 for item in vectors:
 
-    score = cosine_similarity(
-        query_vector,
-        item["embedding"]
-    )
+    score = cosine_similarity(query_vector, item["embedding"])
 
-    scores.append(
-        (item["text"], score)
-    )
+    scores.append((item["text"], score))
 
 
-scores.sort(
-    key=lambda x: x[1],
-    reverse=True
-)
+scores.sort(key=lambda x: x[1], reverse=True)
 
 print("\nSearch Results:\n")
 

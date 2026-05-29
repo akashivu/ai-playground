@@ -4,6 +4,7 @@ from services.sentiment_service import analyze_sentiment
 
 router = APIRouter()
 
+
 @router.post("/sentiment")
 def sentiment(request: ChatRequest):
 
@@ -11,16 +12,10 @@ def sentiment(request: ChatRequest):
 
         last_message = request.messages[-1].content
 
-        result = analyze_sentiment(
-            last_message
-        )
+        result = analyze_sentiment(last_message)
 
-        return {
-            "response": result
-        }
+        return {"response": result}
 
     except Exception as e:
 
-        return {
-            "error": str(e)
-        }
+        return {"error": str(e)}
