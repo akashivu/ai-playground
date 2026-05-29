@@ -1,14 +1,16 @@
 from fastapi import APIRouter
 from models.chat_model import ChatRequest
 from services.llm_services import generate_response
+from fastapi.responses import StreamingResponse
+from services.llm_services import stream_response
 
 router = APIRouter()
 
 @router.post("/chat")
-def chat(request : ChatRequest):
+async def chat(request : ChatRequest):
     try:
-        ai_response = generate_response(
-            request.message
+        ai_response = await generate_response(
+            request.messages
         )
 
         return{
@@ -21,3 +23,13 @@ def chat(request : ChatRequest):
         }
 
    
+@router.post("/stream")
+async def stream_chat(request : ChatRequest):
+    genarator = stream_response(
+        request.messages
+    )
+
+    return StreamingResponse(
+        genarator,
+        media_type="text/plan"
+    )
