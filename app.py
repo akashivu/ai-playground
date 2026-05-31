@@ -5,13 +5,14 @@ from fastapi import Request
 import time
 from utils.logger import logger
 from routes.search_routes import (router as search_router,)
+from routes.rag_routes import (router as rag_router,)
 
 app = FastAPI(title="Ai-Playground")
 
 app.include_router(chat_router)
 app.include_router(sentiment_router)
 app.include_router(search_router)
-
+app.include_router(rag_router)
 
 @app.get("/")
 def Home():
