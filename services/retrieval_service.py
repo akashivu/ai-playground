@@ -3,8 +3,8 @@ import numpy as np
 from embeddings.embedding_service import get_embedding
 
 class RetrievalService:
-    def __init__ (self, vectore_store):
-        self.vector_store=self.vector_store
+    def __init__(self, vector_store):
+        self.vector_store=vector_store
 
     def search(self, query: str, top_k : int=3):
         query_embedding=get_embedding(query)

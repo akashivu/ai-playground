@@ -1,11 +1,7 @@
 from models.rag_model import RAGRequest
-from services.rag_service import RAGService
 from fastapi import APIRouter
-
+from core.dependencies import (rag_service,)
 router= APIRouter()
-
-rag_service = None
-
 
 @router.post("/ask")
 def ask_question(request: RAGRequest,):
