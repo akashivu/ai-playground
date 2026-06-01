@@ -9,3 +9,8 @@ class Message(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: List[Message]
+
+
+class SearchRequest(BaseModel):
+    query : str
+    top_k : int = 3
