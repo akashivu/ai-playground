@@ -18,6 +18,8 @@ from services.hybrid_retrieval_service import (HybridRetrievalService,)
 
 import os
 
+from services.evaluation_service import (EvaluationService,)
+from services.benchmark_service import (BenchmarkService,)
 vector_store = VectorStore(dimension=1536)
 if os.path.exists("faiss.index"):
     vector_store.load_index("faiss.index")
@@ -32,6 +34,9 @@ if vector_store.metadata:
 rag_service = (RAGService(retrieval_service))
 reranking_service = (RerankingService())
 hybrid_retrieval_service = (HybridRetrievalService(retrieval_service,bm25_service,reranking_service,))
-conversational_rag_service = (ConversationalRAGService(retrieval_service,reranking_service,hybrid_retrieval_service,))
+evaluation_service = (EvaluationService())
+conversational_rag_service = (ConversationalRAGService(retrieval_service,reranking_service,hybrid_retrieval_service,
+                                                       evaluation_service,))
 document_service = (DocumentService(vector_store,bm25_service,))
 knowledge_base_service = (KnowledgeBaseService())
+benchmark_service = (BenchmarkService(conversational_rag_service))

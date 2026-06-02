@@ -10,6 +10,7 @@ from routes.chat_rag_routes import (router as chat_rag_router,)
 from routes.document_routes import (router as document_router,)
 from routes.knowledge_base_routes import (router as knowledge_base_router,)
 from routes.hybrid_search_routes import (router as hybrid_search_router,)
+from routes.benchmark_routes import (router as benchmark_router,)
 
 app = FastAPI(title="Ai-Playground")
 
@@ -21,6 +22,7 @@ app.include_router(chat_rag_router)
 app.include_router(document_router)
 app.include_router(knowledge_base_router)
 app.include_router(hybrid_search_router)
+app.include_router(benchmark_router)
 
 @app.get("/")
 def Home():
