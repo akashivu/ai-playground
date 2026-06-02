@@ -1,6 +1,6 @@
 import faiss
 import numpy as np
-
+import json
 
 class VectorStore:
 
@@ -53,3 +53,16 @@ class VectorStore:
     def load_index(self,path,):
 
         self.index = faiss.read_index(path,)
+
+    def save_metadata(self,path,):
+
+        with open(path,"w",encoding="utf-8",) as file:
+         
+         json.dump(self.metadata,file,ensure_ascii=False,indent=4,)
+
+
+    def load_metadata(self,path,):
+
+        with open(path,"r",encoding="utf-8",) as file:
+
+         self.metadata = (json.load(file))
