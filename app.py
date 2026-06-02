@@ -7,6 +7,7 @@ from utils.logger import logger
 from routes.search_routes import (router as search_router,)
 from routes.rag_routes import (router as rag_router,)
 from routes.chat_rag_routes import (router as chat_rag_router,)
+from routes.document_routes import (router as document_router,)
 
 app = FastAPI(title="Ai-Playground")
 
@@ -15,6 +16,7 @@ app.include_router(sentiment_router)
 app.include_router(search_router)
 app.include_router(rag_router)
 app.include_router(chat_rag_router)
+app.include_router(document_router)
 
 @app.get("/")
 def Home():
