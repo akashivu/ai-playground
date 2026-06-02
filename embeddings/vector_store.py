@@ -18,7 +18,7 @@ class VectorStore:
 
         self.metadata.extend(metadata)
 
-    def search(self,query_vector,k=3,):
+    def search(self,query_vector,k=3,collection=None,document_id=None,):
 
         distances, indices = self.index.search(query_vector,k,)
 
@@ -27,10 +27,22 @@ class VectorStore:
         for position, idx in enumerate(indices[0]):
 
             metadata = self.metadata[idx]
+            if (
+            collection
+            and metadata["collection"] != collection
+        ):
+                continue
+
+            if (document_id and metadata["document_id"] != document_id):
+                continue
 
             score = float(distances[0][position])
 
-            results.append({"chunk": metadata["text"], "source": metadata["source"], "score": score,})
+            results.append({"chunk": metadata["text"],
+                   "source": metadata["source"],
+                   "document_id": metadata["document_id"],
+                   "collection": metadata["collection"],
+                   "score": score,})
 
         return results
 

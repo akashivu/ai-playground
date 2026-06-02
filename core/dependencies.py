@@ -10,9 +10,11 @@ from services.reranking_service import (RerankingService,)
 
 from services.document_service import (DocumentService,)
 
+from services.knowledge_base_service import (KnowledgeBaseService,)
 vector_store = VectorStore(dimension=1536)
 retrieval_service = (RetrievalService(vector_store))
 rag_service = (RAGService(retrieval_service))
 reranking_service = (RerankingService())
 conversational_rag_service = (ConversationalRAGService(retrieval_service,reranking_service,))
 document_service = (DocumentService(vector_store))
+knowledge_base_service = (KnowledgeBaseService())
