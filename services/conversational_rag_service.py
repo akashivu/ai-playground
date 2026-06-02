@@ -1,10 +1,12 @@
 from services.retrieval_service import (RetrievalService,)
 from services.llm_services import (generate_query_rewrite,generate_rag_response,)
+
 class ConversationalRAGService:
 
-    def __init__(self,retrieval_service: RetrievalService,):
+    def __init__(self,retrieval_service: RetrievalService,reranking_service,):
 
         self.retrieval_service = (retrieval_service)
+        self.reranking_service = (reranking_service)
 
     async def rewrite_query(self,messages):
             history = "\n".join([f"{msg.role}: {msg.content}"for msg in messages])
@@ -27,6 +29,11 @@ class ConversationalRAGService:
          latest_question = (messages[-1].content)
          rewritten_query = (await self.rewrite_query(messages))
          results = (self.retrieval_service.search(rewritten_query))
+
+         results = (self.reranking_service.deduplicate(results))
+
+         results = (self.reranking_service.rerank(rewritten_query,results,))
+
          context = "\n\n".join([item["chunk"]for item in results])
          history = "\n".join([f"{msg.role}: {msg.content}"for msg in messages])
          prompt = f"""

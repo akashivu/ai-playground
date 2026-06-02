@@ -6,7 +6,10 @@ from services.rag_service import (RAGService,)
 
 from services.conversational_rag_service import (ConversationalRAGService,)
 
+from services.reranking_service import (RerankingService,)
+
 vector_store = VectorStore(dimension=1536)
 retrieval_service = (RetrievalService(vector_store))
 rag_service = (RAGService(retrieval_service))
-conversational_rag_service = (ConversationalRAGService(retrieval_service))
+reranking_service = (RerankingService())
+conversational_rag_service = (ConversationalRAGService(retrieval_service,reranking_service,))
