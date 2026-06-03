@@ -3,10 +3,12 @@ from services.llm_services import (generate_query_rewrite,generate_rag_response,
 
 class ConversationalRAGService:
 
-    def __init__(self,retrieval_service: RetrievalService,reranking_service,):
+    def __init__(self,retrieval_service: RetrievalService,reranking_service,hybrid_retrieval_service,evaluation_service,):
 
         self.retrieval_service = (retrieval_service)
         self.reranking_service = (reranking_service)
+        self.hybrid_retrieval_service = ( hybrid_retrieval_service)
+        self.evaluation_service = (evaluation_service)
 
     async def rewrite_query(self,messages):
             history = "\n".join([f"{msg.role}: {msg.content}"for msg in messages])
@@ -28,11 +30,11 @@ class ConversationalRAGService:
     async def answer_question(self,messages,):
          latest_question = (messages[-1].content)
          rewritten_query = (await self.rewrite_query(messages))
-         results = (self.retrieval_service.search(rewritten_query))
+         results = (self.hybrid_retrieval_service.search(rewritten_query))
 
          results = (self.reranking_service.deduplicate(results))
 
-         results = (self.reranking_service.rerank(rewritten_query,results,))
+         
 
          context = "\n\n".join([item["chunk"]for item in results])
          history = "\n".join([f"{msg.role}: {msg.content}"for msg in messages])
@@ -53,4 +55,6 @@ class ConversationalRAGService:
                  to answer the question."""
          answer = await (generate_rag_response(prompt))
 
-         return answer
+         evaluation = await ( self.evaluation_service.evaluate( latest_question,  context,answer,))
+
+         return {"answer": answer, "evaluation": evaluation,}
