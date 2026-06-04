@@ -9,20 +9,24 @@ evaluation_prompt = PromptTemplate(
 
     template="""
 Question:
-
 {question}
 
 Context:
-
 {context}
 
 Answer:
-
 {answer}
 
 Evaluate whether the answer
-is grounded in the context.
+is grounded in the provided context.
 
-Return JSON only.
+Return JSON only using
+this exact schema:
+
+{{
+    "score": 0-10,
+    "grounded": true,
+    "reason": "short explanation"
+}}
 """,
 )
