@@ -1,0 +1,3 @@
+from langchain_components.tools.knowledge_base_search_tool import knowledge_base_search
+
+TOOLS = [knowledge_base_search]

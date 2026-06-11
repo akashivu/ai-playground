@@ -1,0 +1,20 @@
+from langgraph.graph import (StateGraph,START,END,)
+
+from langchain_components.state.conversation_state import (ConversationState,)
+
+from langchain_components.graph.nodes.rewrite_node import (rewrite_node,)
+from langchain_components.graph.nodes.retrieve_node import (retrieve_node,)
+from langchain_components.graph.nodes.answer_node import ( answer_node,)
+from langchain_components.graph.nodes.evaluation_node import (evaluation_node,)
+graph_builder = StateGraph(ConversationState)
+
+graph_builder.add_node("rewrite",rewrite_node,)
+graph_builder.add_node("retrieve",retrieve_node,)
+graph_builder.add_node( "answer", answer_node,)
+graph_builder.add_node( "evaluate", evaluation_node,)
+graph_builder.add_edge(START,"rewrite",)
+graph_builder.add_edge("rewrite","retrieve",)
+graph_builder.add_edge( "retrieve", "answer",)
+graph_builder.add_edge( "answer", "evaluate",)
+graph_builder.add_edge( "evaluate", END,)
+rag_graph = (graph_builder.compile())
