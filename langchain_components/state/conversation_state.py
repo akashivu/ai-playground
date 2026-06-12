@@ -11,3 +11,5 @@ class ConversationState(TypedDict,total=False,):
     tool_result: str
     iterations: int
     max_iterations: int
+    retrieval_successful: bool
+    retrieval_relevant: bool

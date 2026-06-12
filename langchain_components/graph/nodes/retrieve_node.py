@@ -1,7 +1,12 @@
-from langchain_components.runnables.hybrid_search_pipeline import (hybrid_search_pipeline,)
 
-def retrieve_node(state,):
-    """Retrieves relevant context for the rewritten query."""
-    results = (hybrid_search_pipeline.invoke(state["rewritten_query"]))
-    context = "\n\n".join(item.get("chunk","",)for item in results)
-    return {"context":context}
+from core.dependencies import hybrid_retrieval_service
+
+
+def retrieve_node(state: dict) -> dict:
+    """Retrieves relevant chunks and builds context string."""
+    results = hybrid_retrieval_service.search(state["question"])
+    context = "\n\n".join(r["chunk"] for r in results)
+    return {
+        "context": context,
+        "retrieval_successful": len(results) > 0,
+    }
