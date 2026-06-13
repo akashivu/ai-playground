@@ -2,36 +2,59 @@ from rank_bm25 import BM25Okapi
 
 
 class BM25Service:
+    """BM25 keyword search service with metadata filtering."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        self.metadata: list[dict] = []
+        self.bm25: BM25Okapi | None = None
 
-        self.documents = []
+    def _rebuild_index(self) -> None:
+        """Rebuilds the BM25 index from current metadata."""
+        tokenized = [meta["text"].lower().split() for meta in self.metadata]
+        self.bm25 = BM25Okapi(tokenized)
 
-        self.bm25 = None
+    def build_index(self, metadata: list[dict]) -> None:
+        """Builds BM25 index from a list of metadata dicts."""
+        self.metadata = metadata
+        self._rebuild_index()
 
-    def build_index(self,documents,):
+    def add_documents(self, metadata: list[dict]) -> None:
+        """Adds new documents and rebuilds the index."""
+        self.metadata.extend(metadata)
+        self._rebuild_index()
 
-        self.documents = (documents)
+    def search(
+        self,
+        query: str,
+        top_k: int = 3,
+        collection: str | None = None,
+    ) -> list[dict]:
+        """Returns top-k BM25 results with optional collection filtering."""
+        if self.bm25 is None:
+            raise RuntimeError("BM25 index not built. Call build_index() first.")
 
-        tokenized_docs = [document.split()for document in documents]
+        scores = self.bm25.get_scores(query.lower().split())
+        top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
 
-        self.bm25 = (BM25Okapi(tokenized_docs))
+        results = []
+        for idx in top_indices:
+            if idx >= len(self.metadata):
+                continue
 
-    def search(self,query,top_k=3,):
+            meta = self.metadata[idx]
 
-        query_tokens = (query.split())
+            if collection and meta.get("collection") != collection:
+                continue
 
-        scores = (self.bm25.get_scores(query_tokens))
+            results.append({
+                "chunk": meta["text"],
+                "source": meta["source"],
+                "document_id": meta["document_id"],
+                "collection": meta["collection"],
+                "score": float(scores[idx]),
+            })
 
-        ranked = sorted(zip(self.documents,scores,),
-            key=lambda item: (item[1]),reverse=True,)
+            if len(results) == top_k:
+                break
 
-        return ranked[:top_k]
-
-    def add_documents(self,documents,):
-
-       self.documents.extend(documents)
-
-       tokenized_docs = [document.split() for document in self.documents]
-
-       
+        return results

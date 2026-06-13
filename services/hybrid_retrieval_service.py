@@ -4,40 +4,37 @@ from services.bm25_service import (BM25Service,)
 
 
 class HybridRetrievalService:
+    """Combines vector search and BM25 for hybrid retrieval."""
 
-    def __init__(self,retrieval_service: RetrievalService,bm25_service: BM25Service,reranking_service,):
+    def __init__(self, retrieval_service: RetrievalService, bm25_service: BM25Service) -> None:
+        self.retrieval_service = retrieval_service
+        self.bm25_service = bm25_service
 
-        self.retrieval_service = (retrieval_service)
+    def search(
+        self,
+        query: str,
+        top_k: int = 3,
+        collection: str | None = None,
+    ) -> list[dict]:
+        """Performs hybrid retrieval with optional collection filtering."""
+        vector_results = self.retrieval_service.search(
+            query=query,
+            top_k=top_k,
+            collection=collection,
+        )
+        bm25_results = self.bm25_service.search(
+            query=query,
+            collection=collection,
+        )
+        return self._merge(vector_results, bm25_results)
 
-        self.bm25_service = (bm25_service)
-
-        self.reranking_service = (reranking_service)
-
-    def search(self,query,):
-
-        vector_results = (self.retrieval_service.search(query))
-
-        bm25_results = (self.bm25_service.search(query))
-
-        rrf_scores = {}
-        for rank, result in enumerate(vector_results,start=1,):
-
-               chunk = result["chunk"]
-               score = ( 1 / (60 + rank))
-
-               rrf_scores[chunk] = (rrf_scores.get(chunk,0,)+ score)
-
-        
-
-        for rank, result in enumerate(bm25_results,start=1,):
-
-            chunk = result[0]
-
-            score = (1 / (60 + rank))
-
-            rrf_scores[chunk] = (rrf_scores.get(chunk,0,)+ score)
-
-        sorted_results = sorted(rrf_scores.items(), key=lambda item: item[1],reverse=True,)
-        reranked_results = (self.reranking_service.rerank(query,[{"chunk": item[0] }for item in sorted_results]))
-
-        return reranked_results
+    def _merge(self, vector_results: list[dict], bm25_results: list[dict]) -> list[dict]:
+        """Merges and deduplicates vector and BM25 results."""
+        seen = set()
+        merged = []
+        for result in vector_results + bm25_results:
+            chunk = result["chunk"]
+            if chunk not in seen:
+                seen.add(chunk)
+                merged.append(result)
+        return merged

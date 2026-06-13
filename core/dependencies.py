@@ -8,7 +8,7 @@ from services.conversational_rag_service import (ConversationalRAGService,)
 
 from services.reranking_service import (RerankingService,)
 
-from services.document_service import (DocumentService,)
+from services.knowledge_ingestion_service import (KnowledgeIngestionService,)
 
 from services.knowledge_base_service import (KnowledgeBaseService,)
 
@@ -30,13 +30,13 @@ retrieval_service = (RetrievalService(vector_store))
 bm25_service = (BM25Service())
 if vector_store.metadata:
 
-    bm25_service.add_documents([item["text"] for item in vector_store.metadata])
+    bm25_service.add_documents(vector_store.metadata)
 rag_service = (RAGService(retrieval_service))
 reranking_service = (RerankingService())
 hybrid_retrieval_service = (HybridRetrievalService(retrieval_service,bm25_service,reranking_service,))
 evaluation_service = (EvaluationService())
 conversational_rag_service = (ConversationalRAGService(retrieval_service,reranking_service,hybrid_retrieval_service,
                                                        evaluation_service,))
-document_service = (DocumentService(vector_store,bm25_service,))
+knowledge_ingestion_service = (KnowledgeIngestionService(vector_store,bm25_service,))
 knowledge_base_service = (KnowledgeBaseService())
 benchmark_service = (BenchmarkService(conversational_rag_service))

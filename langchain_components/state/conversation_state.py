@@ -15,3 +15,4 @@ class ConversationState(TypedDict,total=False,):
     retrieval_relevant: bool
     retry_count: int
     max_retries: int
+    collection: str

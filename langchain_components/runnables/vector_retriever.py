@@ -1,4 +1,13 @@
-from langchain_core.runnables import (RunnableLambda,)
-from core.dependencies import (retrieval_service,)
+from langchain_core.runnables import RunnableLambda
+from core.dependencies import retrieval_service
 
-vector_retriever = RunnableLambda(lambda query:retrieval_service.search(query))
+
+def retrieve(payload: dict) -> list[dict]:
+    """Performs vector retrieval for the given query and collection."""
+    return retrieval_service.search(
+        query=payload["query"],
+        collection=payload.get("collection"),
+    )
+
+
+vector_retriever = RunnableLambda(retrieve)
