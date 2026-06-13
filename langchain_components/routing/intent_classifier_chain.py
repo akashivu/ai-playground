@@ -1,0 +1,5 @@
+from langchain_components.routing.intent_classifier_prompt import intent_classifier_prompt
+from langchain_components.routing.intent_classifier_parser import intent_classifier_parser
+from config.llm_config import get_llm
+
+intent_classifier_chain = intent_classifier_prompt | get_llm(temperature=0) | intent_classifier_parser
