@@ -1,25 +1,30 @@
-from fastapi import APIRouter
-from models.chat_model import ChatRequest
-from services.llm_services import generate_response
-from fastapi.responses import StreamingResponse
-from services.llm_services import stream_response
+from fastapi import APIRouter, HTTPException
+from models.chat_model import ChatRequest, ChatResponse
+from core.dependencies import conversation_store
+from langchain_components.routing.intent_router import route_question
 
 router = APIRouter()
 
 
-@router.post("/chat")
-async def chat(request: ChatRequest):
+@router.post("/chat", response_model=ChatResponse)
+async def chat(body: ChatRequest) -> ChatResponse:
+    """Processes a chat message within a session and returns an answer."""
     try:
-        ai_response = await generate_response(request.messages)
+        history = conversation_store.get_messages(body.session_id)
 
-        return {"response": ai_response}
+        state = {
+            "session_id": body.session_id,
+            "question": body.question,
+            "history": history,
+        }
+
+        result = route_question(state)
+        answer = result.get("answer", "I was unable to generate a response.")
+
+        conversation_store.add_message(body.session_id, "user", body.question)
+        conversation_store.add_message(body.session_id, "assistant", answer)
+
+        return ChatResponse(session_id=body.session_id, answer=answer)
 
     except Exception as e:
-        return {"error": str(e)}
-
-
-@router.post("/stream")
-async def stream_chat(request: ChatRequest):
-    genarator = stream_response(request.messages)
-
-    return StreamingResponse(genarator, media_type="text/plan")
+        raise HTTPException(status_code=500, detail=str(e))

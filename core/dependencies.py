@@ -17,6 +17,7 @@ from services.bm25_service import (BM25Service,)
 from services.hybrid_retrieval_service import (HybridRetrievalService,)
 
 import os
+from langchain_components.memory.persistent_conversation_store import PersistentConversationStore
 
 from services.evaluation_service import (EvaluationService,)
 from services.benchmark_service import (BenchmarkService,)
@@ -40,3 +41,4 @@ conversational_rag_service = (ConversationalRAGService(retrieval_service,reranki
 knowledge_ingestion_service = (KnowledgeIngestionService(vector_store,bm25_service,))
 knowledge_base_service = (KnowledgeBaseService())
 benchmark_service = (BenchmarkService(conversational_rag_service))
+conversation_store = PersistentConversationStore(db_path="data/conversations.db")

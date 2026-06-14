@@ -7,8 +7,10 @@ from langchain_components.workflows.workflow_executor import WorkflowExecutor
 workflow_executor = WorkflowExecutor()
 
 
-def route_question(question: str) -> dict:
+def route_question(state: dict) -> dict:
     """Classifies, validates, and routes the question to the correct workflow."""
+    question = state.get("question", "")
+
     result = intent_classifier_chain.invoke({"question": question})
 
     try:
@@ -21,4 +23,4 @@ def route_question(question: str) -> dict:
     except ValueError:
         intent = IntentType.GENERAL
 
-    return workflow_executor.execute(intent=intent, state={"question": question})
+    return workflow_executor.execute(intent=intent, state=state)

@@ -16,3 +16,5 @@ class ConversationState(TypedDict,total=False,):
     retry_count: int
     max_retries: int
     collection: str
+    session_id: str
+    history: list
