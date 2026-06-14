@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from models.chat_model import ChatRequest, ChatResponse
 from core.dependencies import conversation_store
 from langchain_components.routing.intent_router import route_question
+from utils.logger import logger
 
 router = APIRouter()
 
@@ -27,4 +28,5 @@ async def chat(body: ChatRequest) -> ChatResponse:
         return ChatResponse(session_id=body.session_id, answer=answer)
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception("Chat endpoint failed")
+        raise HTTPException(status_code=500, detail="Internal server error.")
