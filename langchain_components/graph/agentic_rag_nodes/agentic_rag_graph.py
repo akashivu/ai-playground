@@ -8,6 +8,9 @@ from langchain_components.graph.agentic_rag_nodes.retry_rewrite_node import retr
 from langchain_components.graph.nodes.retrieve_node import retrieve_node
 from langchain_components.graph.nodes.answer_node import answer_node
 from langchain_components.graph.agentic_rag_nodes.fallback_node import fallback_node
+from langchain_components.graph.agentic_rag_nodes.retrieval_validation_routing import (
+    route_after_retrieval_validation,
+)
 
 
 graph_builder = StateGraph(ConversationState)
@@ -28,3 +31,7 @@ graph_builder.add_edge("answer", END)
 graph_builder.add_edge("fallback", END)
 
 agentic_rag_graph = graph_builder.compile()
+graph_builder.add_conditional_edges("retrieve", route_after_retrieval_validation, {
+    "relevance": "relevance",
+    "retry_or_fallback": "retry_rewrite",  
+})

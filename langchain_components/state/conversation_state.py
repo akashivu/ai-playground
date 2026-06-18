@@ -1,6 +1,7 @@
 from typing import TypedDict
 
-class ConversationState(TypedDict,total=False,):
+
+class ConversationState(TypedDict, total=False):
     question: str
     messages: list
     rewritten_query: str
@@ -13,8 +14,10 @@ class ConversationState(TypedDict,total=False,):
     max_iterations: int
     retrieval_successful: bool
     retrieval_relevant: bool
+    retrieval_failure_reason: str | None
     retry_count: int
     max_retries: int
     collection: str
     session_id: str
     history: list
+    results: list
