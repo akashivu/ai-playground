@@ -25,5 +25,9 @@ def test_intent_enum_invalid_raises():
 
 def test_intent_values_method():
     values = IntentType.values()
+
     assert isinstance(values, list)
-    assert len(values) == 5
+    assert len(values) == len(IntentType)
+
+    for intent in IntentType:
+        assert intent.value in values
