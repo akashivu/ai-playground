@@ -5,12 +5,12 @@ from domains.domain_manager import get_system_prompt
 from config.llm_config import get_llm
 
 
-llm = get_llm(temperature=0.7)
-
-
 @register_workflow(IntentType.GENERAL)
 def general_chat_workflow(state: dict) -> dict:
     """Handles conversational requests with domain personality and session memory."""
+
+    llm = get_llm(temperature=0.7)
+
     messages = [SystemMessage(content=get_system_prompt())]
 
     for item in state.get("history", []):
@@ -22,4 +22,5 @@ def general_chat_workflow(state: dict) -> dict:
     messages.append(HumanMessage(content=state["question"]))
 
     response = llm.invoke(messages)
+
     return {"answer": response.content}
