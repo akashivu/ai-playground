@@ -1,5 +1,7 @@
 import os
 from domains.registry import DOMAINS
+from langchain_components.guardrails.domain_policy import DomainPolicy
+
 
 ACTIVE_DOMAIN = os.getenv("ACTIVE_DOMAIN", "adiyogicabz")
 
@@ -20,3 +22,7 @@ def get_system_prompt() -> str:
 def get_collection_name() -> str:
     """Returns the knowledge base collection name for the active domain."""
     return get_active_domain()["collection_name"]
+
+def get_policy() -> DomainPolicy:
+    """Returns the active domain's policy configuration."""
+    return get_active_domain()["policy"]

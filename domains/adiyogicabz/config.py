@@ -8,4 +8,5 @@ ENABLED_INTENTS = [
     IntentType.FAQ,
     IntentType.BOOKING,
     IntentType.RECOMMENDATION,
+    IntentType.PRICING,
 ]

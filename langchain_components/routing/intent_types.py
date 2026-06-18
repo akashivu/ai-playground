@@ -6,7 +6,9 @@ class IntentType(str, Enum):
     KNOWLEDGE_SEARCH = "KNOWLEDGE_SEARCH"
     BOOKING = "BOOKING"
     RECOMMENDATION = "RECOMMENDATION"
+    PRICING = "PRICING"
     GENERAL = "GENERAL"
+    OUT_OF_DOMAIN = "OUT_OF_DOMAIN"
 
     @classmethod
     def values(cls) -> list[str]:
