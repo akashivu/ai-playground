@@ -34,7 +34,7 @@ if vector_store.metadata:
     bm25_service.add_documents(vector_store.metadata)
 rag_service = (RAGService(retrieval_service))
 reranking_service = (RerankingService())
-hybrid_retrieval_service = (HybridRetrievalService(retrieval_service,bm25_service,reranking_service,))
+hybrid_retrieval_service = (HybridRetrievalService(retrieval_service,bm25_service,))
 evaluation_service = (EvaluationService())
 conversational_rag_service = (ConversationalRAGService(retrieval_service,reranking_service,hybrid_retrieval_service,
                                                        evaluation_service,))
