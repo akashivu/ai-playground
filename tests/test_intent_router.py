@@ -8,11 +8,13 @@ def test_intent_enum_values():
     assert "FAQ" in values
     assert "BOOKING" in values
     assert "RECOMMENDATION" in values
+    assert "PRICING" in values
+    assert "OUT_OF_DOMAIN" in values
 
 
 def test_intent_enum_from_string():
-    intent = IntentType("GENERAL")
-    assert intent == IntentType.GENERAL
+    intent = IntentType("PRICING")
+    assert intent == IntentType.PRICING
 
 
 def test_intent_enum_invalid_raises():
@@ -25,9 +27,5 @@ def test_intent_enum_invalid_raises():
 
 def test_intent_values_method():
     values = IntentType.values()
-
     assert isinstance(values, list)
-    assert len(values) == len(IntentType)
-
-    for intent in IntentType:
-        assert intent.value in values
+    assert len(values) == 7

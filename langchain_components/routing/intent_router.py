@@ -2,7 +2,7 @@ from langchain_components.routing.intent_classifier_chain import intent_classifi
 from langchain_components.routing.intent_types import IntentType
 from langchain_components.routing.intent_validator import validate_intent
 from langchain_components.workflows.workflow_executor import WorkflowExecutor
-
+import langchain_components.workflows
 
 workflow_executor = WorkflowExecutor()
 
