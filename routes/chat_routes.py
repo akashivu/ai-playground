@@ -3,6 +3,7 @@ from models.chat_model import ChatRequest, ChatResponse
 from core.dependencies import conversation_store
 from langchain_components.routing.intent_router import route_question
 from utils.logger import logger
+from services.booking_session_service import (booking_session_service,)
 
 router = APIRouter()
 
@@ -13,13 +14,18 @@ async def chat(body: ChatRequest) -> ChatResponse:
     try:
         history = conversation_store.get_messages(body.session_id)
 
+        
+        booking_details = (booking_session_service.get_booking(body.session_id))
+        
         state = {
             "session_id": body.session_id,
             "question": body.question,
             "history": history,
+            "booking_details": booking_details,
         }
-
         result = route_question(state)
+        if "booking_details" in result:
+            booking_session_service.save_booking(body.session_id,result["booking_details"],)
         answer = result.get("answer", "I was unable to generate a response.")
 
         conversation_store.add_message(body.session_id, "user", body.question)
