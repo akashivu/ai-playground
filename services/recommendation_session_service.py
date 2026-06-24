@@ -1,20 +1,20 @@
-class RecommendationSessionService:
-    """Stores recommendation context per session for handoff to booking workflow."""
+from core.dependencies import conversation_store
 
-    def __init__(self) -> None:
-        self.sessions: dict[str, dict] = {}
+
+class RecommendationSessionService:
+    """SQLite-backed recommendation session service. Survives server restarts."""
 
     def get(self, session_id: str) -> dict:
-        """Returns stored recommendation for a session."""
-        return self.sessions.get(session_id, {})
+        """Returns persisted recommendation details for a session."""
+        return conversation_store.get_recommendation(session_id)
 
     def save(self, session_id: str, recommendation: dict) -> None:
-        """Saves recommendation details for a session."""
-        self.sessions[session_id] = recommendation
+        """Persists recommendation details to SQLite."""
+        conversation_store.save_recommendation(session_id, recommendation)
 
     def clear(self, session_id: str) -> None:
-        """Clears recommendation state after booking is initiated."""
-        self.sessions.pop(session_id, None)
+        """Removes recommendation session data after booking is initiated."""
+        conversation_store.clear_recommendation(session_id)
 
 
 recommendation_session_service = RecommendationSessionService()

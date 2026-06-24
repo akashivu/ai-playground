@@ -1,10 +1,11 @@
+import json
 import sqlite3
 import os
 from datetime import datetime
 
 
 class PersistentConversationStore:
-    """SQLite-backed conversation store. Drop-in replacement for ConversationStore."""
+    """SQLite-backed conversation store with booking and recommendation session support."""
 
     def __init__(self, db_path: str = "data/conversations.db") -> None:
         os.makedirs(os.path.dirname(db_path), exist_ok=True)
@@ -15,7 +16,7 @@ class PersistentConversationStore:
         return sqlite3.connect(self.db_path)
 
     def _init_db(self) -> None:
-        """Creates tables if they don't exist."""
+        """Creates all tables if they don't exist."""
         with self._connect() as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS sessions (
@@ -34,6 +35,20 @@ class PersistentConversationStore:
                     FOREIGN KEY (session_id) REFERENCES sessions(session_id)
                 )
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS booking_sessions (
+                    session_id TEXT PRIMARY KEY,
+                    booking_data TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                )
+            """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS recommendation_sessions (
+                    session_id TEXT PRIMARY KEY,
+                    recommendation_data TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                )
+            """)
 
     def session_exists(self, session_id: str) -> bool:
         """Returns True if session exists in database."""
@@ -44,7 +59,13 @@ class PersistentConversationStore:
             ).fetchone()
         return row is not None
 
-    def add_message(self, session_id: str, role: str, content: str) -> None:
+    def add_message(
+        self,
+        session_id: str,
+        role: str,
+        content: str,
+        metadata: dict | None = None,
+    ) -> None:
         """Appends a message and creates session if needed."""
         now = datetime.now().isoformat()
         with self._connect() as conn:
@@ -83,3 +104,65 @@ class PersistentConversationStore:
         with self._connect() as conn:
             conn.execute("DELETE FROM messages WHERE session_id = ?", (session_id,))
             conn.execute("DELETE FROM sessions WHERE session_id = ?", (session_id,))
+
+    # --- booking session methods ---
+
+    def save_booking(self, session_id: str, booking_data: dict) -> None:
+        """Persists booking details for a session."""
+        now = datetime.now().isoformat()
+        with self._connect() as conn:
+            conn.execute("""
+                INSERT INTO booking_sessions (session_id, booking_data, updated_at)
+                VALUES (?, ?, ?)
+                ON CONFLICT(session_id) DO UPDATE SET
+                    booking_data = excluded.booking_data,
+                    updated_at = excluded.updated_at
+            """, (session_id, json.dumps(booking_data), now))
+
+    def get_booking(self, session_id: str) -> dict:
+        """Returns persisted booking details for a session."""
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT booking_data FROM booking_sessions WHERE session_id = ?",
+                (session_id,)
+            ).fetchone()
+        return json.loads(row[0]) if row else {}
+
+    def clear_booking(self, session_id: str) -> None:
+        """Removes booking session data."""
+        with self._connect() as conn:
+            conn.execute(
+                "DELETE FROM booking_sessions WHERE session_id = ?",
+                (session_id,)
+            )
+
+    # --- recommendation session methods ---
+
+    def save_recommendation(self, session_id: str, recommendation_data: dict) -> None:
+        """Persists recommendation details for a session."""
+        now = datetime.now().isoformat()
+        with self._connect() as conn:
+            conn.execute("""
+                INSERT INTO recommendation_sessions (session_id, recommendation_data, updated_at)
+                VALUES (?, ?, ?)
+                ON CONFLICT(session_id) DO UPDATE SET
+                    recommendation_data = excluded.recommendation_data,
+                    updated_at = excluded.updated_at
+            """, (session_id, json.dumps(recommendation_data), now))
+
+    def get_recommendation(self, session_id: str) -> dict:
+        """Returns persisted recommendation details for a session."""
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT recommendation_data FROM recommendation_sessions WHERE session_id = ?",
+                (session_id,)
+            ).fetchone()
+        return json.loads(row[0]) if row else {}
+
+    def clear_recommendation(self, session_id: str) -> None:
+        """Removes recommendation session data."""
+        with self._connect() as conn:
+            conn.execute(
+                "DELETE FROM recommendation_sessions WHERE session_id = ?",
+                (session_id,)
+            )
