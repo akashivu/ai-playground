@@ -28,4 +28,5 @@ def test_intent_enum_invalid_raises():
 def test_intent_values_method():
     values = IntentType.values()
     assert isinstance(values, list)
-    assert len(values) == 7
+    assert len(values) == 8
+    assert "BOOKING_STATUS" in values
