@@ -5,3 +5,4 @@ import langchain_components.workflows.pricing_workflow
 import langchain_components.workflows.out_of_domain_workflow
 import langchain_components.workflows.booking_workflow
 import langchain_components.workflows.booking_status_workflow
+import langchain_components.workflows.policy_workflow

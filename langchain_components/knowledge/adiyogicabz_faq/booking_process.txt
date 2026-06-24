@@ -1,0 +1,5 @@
+Booking Process
+
+Customers can book a vehicle through the website, customer support, or AI assistant.
+
+Booking confirmation is provided after trip details are verified.

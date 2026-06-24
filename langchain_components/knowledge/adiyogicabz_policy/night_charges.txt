@@ -1,0 +1,5 @@
+Night Charges
+
+Night charges apply for pickups or drops between 11:00 PM and 6:00 AM.
+Night charges are typically 10-15% additional on the base fare.
+Night charges apply to all vehicle categories.

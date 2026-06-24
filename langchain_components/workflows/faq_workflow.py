@@ -1,30 +1,26 @@
 from langchain_components.registry.workflow_decorator import (register_workflow,)
 from langchain_components.routing.intent_types import (IntentType,)
-from langchain_components.knowledge.faq_store import (FAQS,)
+from langchain_components.runnables.hybrid_search_pipeline import (hybrid_search_pipeline,)
+from services.retrieval_validator import (RetrievalValidator,)
 
 
 @register_workflow(IntentType.FAQ)
 def faq_workflow(state: dict) -> dict:
     """
-    Handles frequently asked business questions.
+    Handles FAQ requests using
+    retrieval-based search.
     """
 
-    question = state["question"].lower()
+    results = hybrid_search_pipeline.invoke(
+        {
+            "query": state["question"],
+            "collection": "adiyogicabz_faq",
+        })
 
-    for faq_key, faq_data in FAQS.items():
+    validation = (RetrievalValidator.validate(results))
 
-        keywords = faq_data["keywords"]
+    if not validation.is_valid:
+        return { "answer": ( "I couldn't find a matching FAQ. " "Please contact AdiyogiCabz support.")}
+    answer = "\n\n".join( item["chunk"] for item in results[:3])
 
-        if any(keyword in question for keyword in keywords):
-            return {
-                "answer": faq_data["answer"],
-                "faq_key": faq_key,
-            }
-
-    return {
-        "answer": (
-            "I couldn't find a matching FAQ. "
-            "Please contact AdiyogiCabz support."
-        ),
-        "faq_key": None,
-    }
+    return { "answer": answer,}
