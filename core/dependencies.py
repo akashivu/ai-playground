@@ -21,6 +21,14 @@ from langchain_components.memory.persistent_conversation_store import Persistent
 
 from services.evaluation_service import (EvaluationService,)
 from services.benchmark_service import (BenchmarkService,)
+from fastapi import Depends
+from fastapi import HTTPException
+from fastapi.security import HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer
+
+from auth.jwt_handler import (AuthenticationError,decode_token,)
+from auth.schemas import CurrentUser
+
 vector_store = VectorStore(dimension=1536)
 if os.path.exists("faiss.index"):
     vector_store.load_index("faiss.index")
@@ -42,3 +50,19 @@ knowledge_ingestion_service = (KnowledgeIngestionService(vector_store,bm25_servi
 knowledge_base_service = (KnowledgeBaseService())
 benchmark_service = (BenchmarkService(conversational_rag_service))
 conversation_store = PersistentConversationStore(db_path="data/conversations.db")
+security = HTTPBearer()
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security),) -> CurrentUser:
+    """
+    Validates the JWT from the Authorization header and
+    returns the authenticated user.
+    """
+
+    try:
+        return decode_token(credentials.credentials)
+
+    except AuthenticationError as exc:
+        raise HTTPException(
+            status_code=401,
+            detail=str(exc),
+        )

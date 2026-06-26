@@ -18,6 +18,10 @@ from contextlib import asynccontextmanager
 from core.dependencies import load_vector_store
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from routes.analytics_routes import router as analytics_router
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from routes.history_routes import router as history_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -31,6 +35,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.include_router(history_router)
 app.include_router(chat_router)
 app.include_router(sentiment_router)
 app.include_router(search_router)
@@ -42,6 +47,7 @@ app.include_router(hybrid_search_router)
 app.include_router(benchmark_router)
 app.include_router(session_router, prefix="/api/v1", tags=["sessions"])
 app.include_router(health_router, prefix="/api/v1", tags=["health"])
+app.include_router(analytics_router, prefix="/api/v1", tags=["analytics"])
 
 @app.get("/")
 def Home():
@@ -64,3 +70,9 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
         status_code=500,
         content={"error": "Internal server error."},
     )
+
+app.mount("/admin/static", StaticFiles(directory="frontend/admin"), name="admin")
+
+@app.get("/admin")
+def admin_dashboard():
+    return FileResponse("frontend/admin/index.html")

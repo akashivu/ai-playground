@@ -14,6 +14,7 @@ def booking_workflow(state: dict) -> dict:
     """Conversational booking with slot filling and recommendation handoff."""
     previous_booking = state.get("booking_details") or {}
     previous_recommendation = state.get("recommendation_details") or {}
+    orchestration_result = booking_orchestrator.create_booking(confirmation)
     booking_id = (orchestration_result.get("booking", {}).get("booking_id"))
   
     if (
@@ -46,7 +47,7 @@ def booking_workflow(state: dict) -> dict:
         "booking_details": merged_booking,
         "completed": False,
     }
-    orchestration_result = booking_orchestrator.create_booking(confirmation)
+    
 
     return {
         "answer": (

@@ -3,48 +3,54 @@ from datetime import datetime, timedelta
 
 
 class ConversationStore:
-    """In-memory conversation history store with TTL expiry."""
+    """In-memory conversation history store with TTL expiry, scoped by user and session."""
 
     def __init__(self, ttl_minutes: int = 60) -> None:
-        self.sessions: dict[str, list[dict]] = defaultdict(list)
-        self._last_active: dict[str, datetime] = {}
+        # Structure: { user_id: { session_id: [messages] } }
+        self.sessions: dict[str, dict[str, list[dict]]] = defaultdict(lambda: defaultdict(list))
+        self._last_active: dict[tuple[str, str], datetime] = {}
         self._ttl = timedelta(minutes=ttl_minutes)
 
-    def _is_expired(self, session_id: str) -> bool:
-        last = self._last_active.get(session_id)
+    def _key(self, user_id: str, session_id: str) -> tuple[str, str]:
+        return (user_id, session_id)
+
+    def _is_expired(self, user_id: str, session_id: str) -> bool:
+        last = self._last_active.get(self._key(user_id, session_id))
         if last is None:
             return False
         return datetime.now() - last > self._ttl
 
-    def session_exists(self, session_id: str) -> bool:
-        """Returns True if session exists and has not expired."""
-        if self._is_expired(session_id):
-            self.clear_session(session_id)
+    def session_exists(self, user_id: str, session_id: str) -> bool:
+        if self._is_expired(user_id, session_id):
+            self.clear_session(user_id, session_id)
             return False
-        return session_id in self.sessions
+        return session_id in self.sessions.get(user_id, {})
 
-    def add_message(self, session_id: str, role: str, content: str) -> None:
-        """Appends a message to the session history."""
-        if self._is_expired(session_id):
-            self.clear_session(session_id)
-        self.sessions[session_id].append({"role": role, "content": content})
-        self._last_active[session_id] = datetime.now()
+    def add_message(self, user_id: str, session_id: str, role: str, content: str) -> None:
+        if self._is_expired(user_id, session_id):
+            self.clear_session(user_id, session_id)
+        self.sessions[user_id][session_id].append({"role": role, "content": content})
+        self._last_active[self._key(user_id, session_id)] = datetime.now()
 
-    def get_messages(self, session_id: str, max_messages: int = 10) -> list[dict]:
-        """Returns last N messages for a session."""
-        if self._is_expired(session_id):
-            self.clear_session(session_id)
+    def get_messages(self, user_id: str, session_id: str, max_messages: int = 10) -> list[dict]:
+        if self._is_expired(user_id, session_id):
+            self.clear_session(user_id, session_id)
             return []
-        return self.sessions.get(session_id, [])[-max_messages:]
+        return self.sessions.get(user_id, {}).get(session_id, [])[-max_messages:]
 
-    def get_session(self, session_id: str) -> list[dict]:
-        """Returns full conversation history for a session."""
-        if self._is_expired(session_id):
-            self.clear_session(session_id)
+    def get_session(self, user_id: str, session_id: str) -> list[dict]:
+        if self._is_expired(user_id, session_id):
+            self.clear_session(user_id, session_id)
             return []
-        return self.sessions.get(session_id, [])
+        return self.sessions.get(user_id, {}).get(session_id, [])
 
-    def clear_session(self, session_id: str) -> None:
-        """Removes all history for a session."""
-        self.sessions.pop(session_id, None)
-        self._last_active.pop(session_id, None)
+    def get_user_sessions(self, user_id: str) -> list[str]:
+        """Returns all active session IDs for a user."""
+        return list(self.sessions.get(user_id, {}).keys())
+
+    def clear_session(self, user_id: str, session_id: str) -> None:
+        if user_id in self.sessions:
+            self.sessions[user_id].pop(session_id, None)
+            if not self.sessions[user_id]:
+                del self.sessions[user_id]
+        self._last_active.pop(self._key(user_id, session_id), None)

@@ -1,57 +1,39 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from models.chat_model import ChatRequest, ChatResponse
-from core.dependencies import conversation_store
-from langchain_components.routing.intent_router import route_question
-from services.recommendation_session_service import recommendation_session_service
-from services.booking_session_service import booking_session_service
+from services.rate_limit_service import rate_limit_service
+from services.conversation_manager import conversation_manager
 from utils.logger import logger
-
+from auth.schemas import CurrentUser
+from core.dependencies import get_current_user
+from auth.optional_auth import get_current_or_guest_user
 router = APIRouter()
 
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat(body: ChatRequest) -> ChatResponse:
-    """Processes a chat message with session memory and recommendation handoff."""
+async def chat(
+    body: ChatRequest,
+    current_user: CurrentUser = Depends(get_current_or_guest_user),
+) -> ChatResponse:
+    if not rate_limit_service.allow_request(
+        user_id=str(current_user.user_id),
+        session_id=body.session_id,
+    ):
+        raise HTTPException(
+            status_code=429,
+            detail="Too many requests. Please try again later.",
+        )
+
     try:
-        history = conversation_store.get_messages(body.session_id)
-        booking_details = booking_session_service.get_booking(body.session_id)
-        previous_recommendation = recommendation_session_service.get(body.session_id)
+        response = conversation_manager.process_message(
+            current_user=current_user,
+            session_id=body.session_id,
+            question=body.question,
+        )
+        return ChatResponse(
+            session_id=response.session_id,
+            answer=response.answer,
+        )
 
-        state = {
-            "session_id": body.session_id,
-            "question": body.question,
-            "history": history,
-            "booking_details": booking_details,
-            "recommendation_details": previous_recommendation,
-        }
-
-        result = route_question(state)
-        answer = result.get("answer", "I was unable to generate a response.")
-
-        # persist booking progress after every turn
-        if result.get("booking_details"):
-            booking_session_service.save_booking(
-                body.session_id,
-                result["booking_details"],
-            )
-
-        # persist recommendation for handoff to booking
-        if "recommendation_details" in result:
-            recommendation_session_service.save(
-                body.session_id,
-                result["recommendation_details"],
-            )
-
-        # clear transient state when booking is complete
-        if result.get("completed"):
-            booking_session_service.clear_booking(body.session_id)
-            recommendation_session_service.clear(body.session_id)
-
-        conversation_store.add_message(body.session_id, "user", body.question)
-        conversation_store.add_message(body.session_id, "assistant", answer)
-
-        return ChatResponse(session_id=body.session_id, answer=answer)
-
-    except Exception as e:
+    except Exception:
         logger.exception("Chat endpoint failed")
         raise HTTPException(status_code=500, detail="Internal server error.")

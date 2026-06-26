@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdiyogiCabz · AI Admin</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f4;
+    --bg-tertiary: #f0efee;
+    --text-primary: #1a1a1a;
+    --text-secondary: #6b6b6b;
+    --text-tertiary: #a0a0a0;
+    --border: rgba(0,0,0,0.08);
+    --border-hover: rgba(0,0,0,0.15);
+    --accent: #4f7ef8;
+    --green: #3db87a;
+    --amber: #f8a84f;
+    --red: #e05c5c;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #1c1c1e;
+      --bg-secondary: #2c2c2e;
+      --bg-tertiary: #111111;
+      --text-primary: #f0f0f0;
+      --text-secondary: #a0a0a0;
+      --text-tertiary: #666666;
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(255,255,255,0.15);
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .shell { display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--bg-primary);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .logo {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+
+  .logo-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0.01em;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+  }
+
+  .nav-section {
+    padding: 8px 12px 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-tertiary);
+    margin-top: 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 20px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    border-radius: 0;
+    transition: background 0.1s, color 0.1s;
+  }
+
+  .nav-item:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+
+  .nav-item.active {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .nav-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.3;
+    flex-shrink: 0;
+  }
+
+  .nav-item.active .nav-dot {
+    background: var(--accent);
+    opacity: 1;
+  }
+
+  /* Main */
+  .main {
+    flex: 1;
+    margin-left: 220px;
+    padding: 32px 36px;
+    min-height: 100vh;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  .page-title { font-size: 18px; font-weight: 500; }
+
+  .page-sub {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+  }
+
+  .refresh-btn {
+    font-size: 12px;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    background: var(--bg-primary);
+    padding: 7px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.1s;
+    white-space: nowrap;
+  }
+
+  .refresh-btn:hover { background: var(--bg-secondary); }
+
+  /* KPI grid */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .kpi {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+
+  .kpi-value {
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 8px;
+  }
+
+  /* Charts row */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+  }
+
+  /* Bar chart */
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 96px;
+  }
+
+  .bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+
+  .bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    background: var(--accent);
+    opacity: 0.75;
+    transition: opacity 0.15s;
+    cursor: pointer;
+    position: relative;
+    min-height: 4px;
+  }
+
+  .bar:hover { opacity: 1; }
+
+  .bar-tip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    font-size: 11px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+
+  .bar:hover .bar-tip { opacity: 1; }
+  .bar-label { font-size: 10px; color: var(--text-tertiary); }
+
+  /* Intent list */
+  .intent-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .intent-row { display: flex; align-items: center; gap: 10px; }
+
+  .intent-name {
+    font-size: 12px;
+    color: var(--text-secondary);
+    width: 130px;
+    flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .intent-track {
+    flex: 1;
+    height: 6px;
+    background: var(--bg-secondary);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .intent-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  .intent-count {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    width: 36px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Bottom row */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* Cost table */
+  .cost-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .cost-row:last-child { border-bottom: none; }
+  .cost-intent { color: var(--text-secondary); }
+  .cost-val { font-variant-numeric: tabular-nums; font-size: 12px; }
+
+  /* Status */
+  .status-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .status-left { display: flex; align-items: center; gap: 10px; }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-green { background: var(--green); }
+  .dot-amber { background: var(--amber); }
+  .dot-gray { background: var(--border-hover); }
+  .dot-red { background: var(--red); }
+
+  .status-name { font-size: 13px; color: var(--text-secondary); }
+
+  .badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  .badge-ok { background: rgba(61,184,122,0.12); color: var(--green); }
+  .badge-warn { background: rgba(248,168,79,0.12); color: var(--amber); }
+  .badge-off { background: var(--bg-secondary); color: var(--text-tertiary); }
+  .badge-err { background: rgba(224,92,92,0.12); color: var(--red); }
+
+  /* Performance */
+  .perf-stats {
+    display: flex;
+    gap: 28px;
+    margin-top: 16px;
+  }
+
+  .perf-stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-tertiary);
+  }
+
+  .perf-stat-value {
+    font-size: 22px;
+    font-weight: 500;
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Sparkline */
+  .sparkline {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 44px;
+  }
+
+  .spark {
+    flex: 1;
+    border-radius: 3px 3px 0 0;
+    background: var(--bg-secondary);
+    min-height: 4px;
+    transition: background 0.2s;
+  }
+
+  .spark.today { background: var(--amber); }
+
+  /* Loading state */
+  .loading { color: var(--text-tertiary); font-size: 13px; }
+
+  /* Error banner */
+  .error-banner {
+    background: rgba(224,92,92,0.08);
+    border: 1px solid rgba(224,92,92,0.2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--red);
+    margin-bottom: 20px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-name">AdiyogiCabz</div>
+      <div class="logo-sub">AI Platform · Admin</div>
+    </div>
+
+    <div class="nav-section">Analytics</div>
+    <button class="nav-item active" onclick="setPage('overview', this)">
+      <span class="nav-dot"></span> Overview
+    </button>
+    <button class="nav-item" onclick="setPage('requests', this)">
+      <span class="nav-dot"></span> Requests
+    </button>
+    <button class="nav-item" onclick="setPage('cost', this)">
+      <span class="nav-dot"></span> Cost & Tokens
+    </button>
+
+    <div class="nav-section">Platform</div>
+    <button class="nav-item" onclick="setPage('sessions', this)">
+      <span class="nav-dot"></span> Sessions
+    </button>
+    <button class="nav-item" onclick="setPage('workflows', this)">
+      <span class="nav-dot"></span> Workflows
+    </button>
+
+    <div class="nav-section">System</div>
+    <button class="nav-item" onclick="setPage('health', this)">
+      <span class="nav-dot"></span> Health
+    </button>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">Overview</div>
+        <div class="page-sub" id="last-updated">Fetching data…</div>
+      </div>
+      <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+    </div>
+
+    <div class="error-banner" id="error-banner">
+      Could not reach the API. Showing mock data for preview.
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Total requests</div>
+        <div class="kpi-value" id="kpi-requests">—</div>
+        <div class="kpi-sub" id="kpi-today">Loading…</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Sessions</div>
+        <div class="kpi-value" id="kpi-sessions">—</div>
+        <div class="kpi-sub">Unique users</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Est. cost</div>
+        <div class="kpi-value" id="kpi-cost">—</div>
+        <div class="kpi-sub">USD this month</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg latency</div>
+        <div class="kpi-value" id="kpi-latency">—</div>
+        <div class="kpi-sub">Seconds per request</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+      <div class="card">
+        <div class="card-title">Requests · last 7 days</div>
+        <div class="bar-chart" id="daily-chart">
+          <span class="loading">Loading…</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Intent distribution</div>
+        <div class="intent-list" id="intent-list">
+          <span class="loading">Loading…</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom -->
+    <div class="bottom-row">
+
+      <div class="card">
+        <div class="card-title">Performance</div>
+        <div class="sparkline" id="sparkline"></div>
+        <div class="perf-stats">
+          <div>
+            <div class="perf-stat-label">Avg latency</div>
+            <div class="perf-stat-value" id="perf-latency">—</div>
+          </div>
+          <div>
+            <div class="perf-stat-label">Total tokens</div>
+            <div class="perf-stat-value" id="perf-tokens">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">System status</div>
+        <div class="status-list">
+          <div class="status-row">
+            <div class="status-left">
+              <div class="status-dot dot-gray" id="dot-api"></div>
+              <div class="status-name">Chat API</div>
+            </div>
+            <span class="badge badge-off" id="badge-api">Checking…</span>
+          </div>
+          <div class="status-row">
+            <div class="status-left">
+              <div class="status-dot dot-gray" id="dot-vector"></div>
+              <div class="status-name">Vector Store</div>
+            </div>
+            <span class="badge badge-off" id="badge-vector">Checking…</span>
+          </div>
+          <div class="status-row">
+            <div class="status-left">
+              <div class="status-dot dot-green"></div>
+              <div class="status-name">SQLite DB</div>
+            </div>
+            <span class="badge badge-ok">Connected</span>
+          </div>
+          <div class="status-row">
+            <div class="status-left">
+              <div class="status-dot dot-gray"></div>
+              <div class="status-name">Booking API</div>
+            </div>
+            <span class="badge badge-off">Not configured</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<script>
+const COLORS = ['#4f7ef8','#3db87a','#f8a84f','#e05c5c','#a78bfa','#38bdf8','#fb7185'];
+
+const MOCK_ANALYTICS = {
+  total_requests: 1247,
+  total_sessions: 143,
+  average_latency: 0.84,
+  top_intents: [
+    {intent:'BOOKING',count:420},
+    {intent:'FAQ',count:218},
+    {intent:'PRICING',count:196},
+    {intent:'POLICY',count:152},
+    {intent:'KNOWLEDGE_SEARCH',count:118},
+    {intent:'RECOMMENDATION',count:87},
+    {intent:'GENERAL',count:56},
+  ],
+  daily_requests: [
+    {date:'Jun 19',count:142},{date:'Jun 20',count:189},
+    {date:'Jun 21',count:201},{date:'Jun 22',count:176},
+    {date:'Jun 23',count:223},{date:'Jun 24',count:198},
+    {date:'Jun 25',count:118},
+  ],
+};
+
+const MOCK_COST = {
+  total_tokens: 98400,
+  total_cost_usd: 2.14,
+  cost_by_intent: [
+    {intent:'BOOKING',total_cost:0.72},
+    {intent:'KNOWLEDGE_SEARCH',total_cost:0.51},
+    {intent:'POLICY',total_cost:0.38},
+    {intent:'FAQ',total_cost:0.29},
+    {intent:'PRICING',total_cost:0.24},
+  ],
+};
+
+const MOCK_HEALTH = {
+  status: 'healthy',
+  vector_store_loaded: true,
+  vector_store_documents: 248,
+};
+
+function fmt(n) {
+  if (n === null || n === undefined) return '—';
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(1) + 'k';
+  return String(n);
+}
+
+function renderKPIs(a, c) {
+  document.getElementById('kpi-requests').textContent = fmt(a.total_requests);
+  document.getElementById('kpi-sessions').textContent = fmt(a.total_sessions);
+  document.getElementById('kpi-cost').textContent = '$' + (c.total_cost_usd || 0).toFixed(2);
+  document.getElementById('kpi-latency').textContent = (a.average_latency || 0).toFixed(2) + 's';
+  document.getElementById('perf-latency').textContent = (a.average_latency || 0).toFixed(2) + 's';
+  document.getElementById('perf-tokens').textContent = fmt(c.total_tokens || 0);
+
+  const daily = a.daily_requests || [];
+  const today = daily[daily.length - 1];
+  document.getElementById('kpi-today').textContent = today
+    ? `${today.count} today`
+    : 'No data yet';
+}
+
+function renderDailyChart(daily) {
+  if (!daily || !daily.length) {
+    document.getElementById('daily-chart').innerHTML = '<span class="loading">No data yet</span>';
+    return;
+  }
+  const max = Math.max(...daily.map(d => d.count), 1);
+  document.getElementById('daily-chart').innerHTML = daily.map((d, i) => {
+    const h = Math.max(4, Math.round((d.count / max) * 90));
+    const label = d.date.includes(' ') ? d.date.split(' ')[1] : d.date.slice(-2);
+    return `
+      <div class="bar-col">
+        <div class="bar" style="height:${h}px">
+          <div class="bar-tip">${d.date}: ${d.count}</div>
+        </div>
+        <div class="bar-label">${label}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderIntents(intents) {
+  if (!intents || !intents.length) {
+    document.getElementById('intent-list').innerHTML = '<span class="loading">No data yet</span>';
+    return;
+  }
+  const max = Math.max(...intents.map(i => i.count), 1);
+  document.getElementById('intent-list').innerHTML = intents.slice(0, 7).map((item, i) => `
+    <div class="intent-row">
+      <div class="intent-name">${item.intent}</div>
+      <div class="intent-track">
+        <div class="intent-fill" style="width:${Math.round((item.count/max)*100)}%;background:${COLORS[i % COLORS.length]}"></div>
+      </div>
+      <div class="intent-count">${item.count}</div>
+    </div>`
+  ).join('');
+}
+
+function renderSparkline(daily) {
+  if (!daily || !daily.length) return;
+  const max = Math.max(...daily.map(d => d.count), 1);
+  document.getElementById('sparkline').innerHTML = daily.map((d, i) => {
+    const h = Math.max(4, Math.round((d.count / max) * 40));
+    const isToday = i === daily.length - 1;
+    return `<div class="spark ${isToday ? 'today' : ''}" style="height:${h}px" title="${d.date}: ${d.count}"></div>`;
+  }).join('');
+}
+
+function renderHealth(h) {
+  if (!h) return;
+
+  const apiOk = h.status === 'healthy';
+  document.getElementById('dot-api').className = 'status-dot ' + (apiOk ? 'dot-green' : 'dot-red');
+  document.getElementById('badge-api').textContent = apiOk ? 'Operational' : 'Degraded';
+  document.getElementById('badge-api').className = 'badge ' + (apiOk ? 'badge-ok' : 'badge-err');
+
+  const loaded = h.vector_store_loaded;
+  document.getElementById('dot-vector').className = 'status-dot ' + (loaded ? 'dot-green' : 'dot-amber');
+  document.getElementById('badge-vector').textContent = loaded
+    ? `Loaded · ${h.vector_store_documents} docs`
+    : 'Empty — run ingestion';
+  document.getElementById('badge-vector').className = 'badge ' + (loaded ? 'badge-ok' : 'badge-warn');
+}
+
+function setLastUpdated() {
+  const now = new Date();
+  document.getElementById('last-updated').textContent =
+    `Last updated ${now.toLocaleTimeString()} · ${now.toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'})}`;
+}
+
+function setPage(name, el) {
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+async function loadAll() {
+  let useMock = false;
+
+  try {
+    const [aRes, cRes, hRes] = await Promise.all([
+      fetch('/api/v1/analytics'),
+      fetch('/api/v1/analytics/cost'),
+      fetch('/api/v1/health'),
+    ]);
+
+    if (!aRes.ok || !cRes.ok) throw new Error('API error');
+
+    const a = await aRes.json();
+    const c = await cRes.json();
+    const h = hRes.ok ? await hRes.json() : null;
+
+    renderKPIs(a, c);
+    renderDailyChart(a.daily_requests || []);
+    renderIntents(a.top_intents || []);
+    renderSparkline(a.daily_requests || []);
+    renderHealth(h);
+
+  } catch (e) {
+    useMock = true;
+    document.getElementById('error-banner').style.display = 'block';
+    renderKPIs(MOCK_ANALYTICS, MOCK_COST);
+    renderDailyChart(MOCK_ANALYTICS.daily_requests);
+    renderIntents(MOCK_ANALYTICS.top_intents);
+    renderSparkline(MOCK_ANALYTICS.daily_requests);
+    renderHealth(MOCK_HEALTH);
+  }
+
+  setLastUpdated();
+}
+
+loadAll();
+</script>
+
+</body>
+</html>
