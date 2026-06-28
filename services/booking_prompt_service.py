@@ -1,13 +1,78 @@
-FIELD_QUESTIONS = {
-    "pickup_location": "What is your pickup location?",
-    "destination": "Where would you like to travel?",
-    "travel_date": "What is your travel date?",
-    "vehicle_type": "Which vehicle would you prefer? (e.g. Sedan, Innova, Tempo Traveller)",
+BOOKING_PROMPTS = {
+    "name": (
+        "May I have your full name for the booking?"
+    ),
+
+    "email": (
+        "Which email address should we send your booking confirmation to?"
+    ),
+
+    "mobile": (
+        "Please share your mobile number."
+    ),
+
+    "trip_category": (
+        "Which type of booking would you like?\n\n"
+        "• One Way\n"
+        "• Round Trip\n"
+        "• Airport Transfer\n"
+        "• Rental"
+    ),
+
+    "trip_type": (
+        "Please specify your trip type."
+    ),
+
+    "pickup_location": (
+        "Where should we pick you up?"
+    ),
+
+    "destination": (
+        "Where would you like to travel?"
+    ),
+
+    "city": (
+        "Which city is this trip in?"
+    ),
+
+    "pickup_address": (
+        "Please share the exact pickup address."
+    ),
+
+    "travel_date": (
+        "On which date would you like to travel? "
+        "(Example: 25 July 2026)"
+    ),
+
+    "pickup_time": (
+        "What time should the driver arrive?"
+    ),
+
+    "vehicle_type": (
+        "Which vehicle would you prefer?\n\n"
+        "• Sedan\n"
+        "• SUV\n"
+        "• Innova\n"
+        "• Tempo Traveller"
+    ),
 }
 
 
-def get_next_question(missing_fields: list[str]) -> str:
-    """Returns the natural language question for the first missing field."""
+def get_next_question(
+    missing_fields: list[str],
+) -> str:
+    """
+    Returns the next conversational prompt for the
+    first missing booking field.
+    """
+
     if not missing_fields:
-        return ""
-    return FIELD_QUESTIONS.get(missing_fields[0], f"Please provide your {missing_fields[0]}.")
+        return (
+            "Thank you. I have everything needed "
+            "to process your booking."
+        )
+
+    return BOOKING_PROMPTS.get(
+        missing_fields[0],
+        "Could you please provide the remaining booking information?",
+    )

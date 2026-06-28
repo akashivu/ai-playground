@@ -32,6 +32,7 @@ def get_current_or_guest_user(
             email=user.email,
             role=user.role,
             is_guest=False,
+            jwt_token=credentials.credentials,
         )
 
     except AuthenticationError:

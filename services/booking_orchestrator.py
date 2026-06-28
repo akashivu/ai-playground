@@ -1,125 +1,84 @@
-import os
-import httpx
 from utils.logger import logger
+from auth.schemas import CurrentUser
+from clients.spring_booking_client import spring_booking_client
 from models.booking_confirmation import BookingConfirmation
+from models.booking_result import BookingResult
 
 
 class BookingOrchestrator:
     """
-    Orchestrates the booking lifecycle.
-    Currently returns structured confirmation.
-    Wire to AdiyogiCabz booking API when ready.
+    Coordinates the complete booking lifecycle.
     """
 
-    def __init__(self) -> None:
-        self.api_url = os.getenv("ADIYOGICABZ_API_URL")
-        self.api_key = os.getenv("ADIYOGICABZ_API_KEY")
-
-    def create_booking(self, confirmation: BookingConfirmation) -> dict:
-        """Creates a booking. Returns structured confirmation object."""
+    def create_booking(
+        self,
+        confirmation: BookingConfirmation,
+        current_user: CurrentUser | None = None,
+    ) -> BookingResult:
         logger.info(
-            f"Booking request: {confirmation.pickup_location} → "
-            f"{confirmation.destination} on {confirmation.travel_date}"
+            "Booking request: %s -> %s",
+            confirmation.pickup_location,
+            confirmation.destination,
         )
 
-        if self.api_url and self.api_key:
-            return self._create_via_api(confirmation)
+        estimate = spring_booking_client.estimate_fare(
+            pickup=confirmation.pickup_location,
+            destination=confirmation.destination,
+            current_user=current_user,
+        )
 
-        return self._create_local(confirmation)
+        if estimate:
+            confirmation.distance_km = estimate.get("distanceKm", 0)
+            confirmation.fare = estimate.get("fare", 0)
 
-    def _create_local(self, confirmation: BookingConfirmation) -> dict:
-        """Returns structured booking data without API call. Used until API is ready."""
-        return {
-            "status": "pending",
-            "message": "Booking received. Our team will confirm shortly.",
-            "booking": confirmation.model_dump(),
-        }
+        response = spring_booking_client.confirm_booking(
+            confirmation=confirmation,
+            current_user=current_user,
+        )
 
-    def _create_via_api(self, confirmation: BookingConfirmation) -> dict:
-        """Posts booking to AdiyogiCabz backend API."""
-        try:
-            response = httpx.post(
-                f"{self.api_url}/api/bookings",
-                json=confirmation.model_dump(),
-                headers={"Authorization": f"Bearer {self.api_key}"},
-                timeout=10.0,
+        if response is None:
+            return BookingResult(
+                success=False,
+                status="FAILED",
+                message="Unable to create booking at the moment.",
+                fare=confirmation.fare,
+                distance_km=confirmation.distance_km,
             )
-            response.raise_for_status()
-            return response.json()
 
-        except httpx.TimeoutException:
-            logger.error("AdiyogiCabz API timeout during booking creation.")
-            return self._create_local(confirmation)
+        return BookingResult(
+            success=True,
+            booking_id=response.booking_id,
+            status=response.status,
+            message="Booking confirmed successfully.",
+            fare=response.fare,
+            distance_km=response.distance_km,
+        )
 
-        except httpx.HTTPStatusError as e:
-            logger.error(f"AdiyogiCabz API error: {e.response.status_code}")
-            return self._create_local(confirmation)
+    def get_booking_status(
+        self,
+        booking_id: int,
+        current_user: CurrentUser | None = None,
+    ) -> BookingResult:
+        response = spring_booking_client.get_booking_status(
+            booking_id=booking_id,
+            current_user=current_user,
+        )
 
-        except Exception as e:
-            logger.exception(f"Unexpected error during booking creation: {e}")
-            return self._create_local(confirmation)
-
-    def get_booking_status(self, booking_id: str) -> dict:
-        """Returns booking status from API or local fallback."""
-        logger.info(f"Fetching status for booking: {booking_id}")
-
-        if self.api_url and self.api_key:
-            return self._get_status_via_api(booking_id)
-
-        return {
-            "booking_id": booking_id,
-            "status": "PENDING",
-            "message": "Status check unavailable. Please contact AdiyogiCabz support.",
-        }
-
-    def _get_status_via_api(self, booking_id: str) -> dict:
-        """Fetches booking status from AdiyogiCabz backend."""
-        try:
-            response = httpx.get(
-                f"{self.api_url}/api/bookings/{booking_id}",
-                headers={"Authorization": f"Bearer {self.api_key}"},
-                timeout=10.0,
+        if response is None:
+            return BookingResult(
+                success=False,
+                booking_id=booking_id,
+                status="NOT_FOUND",
+                message="Booking not found.",
             )
-            response.raise_for_status()
-            return response.json()
 
-        except httpx.TimeoutException:
-            logger.error(
-                f"API timeout fetching status for booking: {booking_id}"
-            )
-            return {
-                "booking_id": booking_id,
-                "status": "UNKNOWN",
-                "message": "Request timed out.",
-            }
-
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 404:
-                return {
-                    "booking_id": booking_id,
-                    "status": "NOT_FOUND",
-                    "message": "Booking not found.",
-                }
-
-            logger.error(
-                f"API error fetching booking status: "
-                f"{e.response.status_code}"
-            )
-            return {
-                "booking_id": booking_id,
-                "status": "ERROR",
-                "message": "Unable to fetch status.",
-            }
-
-        except Exception as e:
-            logger.exception(
-                f"Unexpected error fetching booking status: {e}"
-            )
-            return {
-                "booking_id": booking_id,
-                "status": "ERROR",
-                "message": "Unable to fetch status.",
-            }
+        return BookingResult(
+            success=True,
+            booking_id=response.booking_id,
+            status=response.status,
+            message="Booking status retrieved.",
+            fare=response.fare,
+        )
 
 
 booking_orchestrator = BookingOrchestrator()

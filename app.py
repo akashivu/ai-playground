@@ -22,6 +22,7 @@ from routes.analytics_routes import router as analytics_router
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from routes.history_routes import router as history_router
+from routes.conversation_routes import router as conversation_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -45,6 +46,7 @@ app.include_router(document_router)
 app.include_router(knowledge_base_router)
 app.include_router(hybrid_search_router)
 app.include_router(benchmark_router)
+app.include_router(conversation_router)
 app.include_router(session_router, prefix="/api/v1", tags=["sessions"])
 app.include_router(health_router, prefix="/api/v1", tags=["health"])
 app.include_router(analytics_router, prefix="/api/v1", tags=["analytics"])
