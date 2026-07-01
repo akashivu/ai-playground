@@ -25,7 +25,7 @@ Rules:
 
 Return this JSON:
 
-{
+{{
   "name": null,
   "email": null,
   "mobile": null,
@@ -40,7 +40,7 @@ Return this JSON:
   "vehicle_type": null,
   "distance_km": null,
   "fare": null
-}
+}}
 
 User message:
 
