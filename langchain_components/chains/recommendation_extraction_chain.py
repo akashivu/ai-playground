@@ -1,5 +1,5 @@
 from langchain_core.output_parsers import JsonOutputParser
-from langchain_components.prompts.booking_extraction_prompt import recommendation_extraction_prompt
+from langchain_components.prompts.recommendation_extraction_prompt import recommendation_extraction_prompt
 from config.llm_config import get_llm
 
 recommendation_extraction_chain = (
