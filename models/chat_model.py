@@ -15,3 +15,7 @@ class ChatRequest(BaseModel):
 class SearchRequest(BaseModel):
     query : str
     top_k : int = 3
+
+class ChatResponse(BaseModel):
+    session_id: str
+    answer: str

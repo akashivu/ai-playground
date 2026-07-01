@@ -1,3 +1,4 @@
+from config.storage_config import FAISS_INDEX_PATH, METADATA_PATH
 from embeddings.vector_store import (VectorStore,)
 
 from services.retrieval_service import (RetrievalService,)
@@ -66,3 +67,12 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
             status_code=401,
             detail=str(exc),
         )
+
+def load_vector_store() -> None:
+    """Loads FAISS index and metadata on startup."""
+    if os.path.exists(FAISS_INDEX_PATH):
+        vector_store.load_index(FAISS_INDEX_PATH)
+    if os.path.exists(METADATA_PATH):
+        vector_store.load_metadata(METADATA_PATH)
+    if vector_store.metadata:
+        bm25_service.build_index(vector_store.metadata)

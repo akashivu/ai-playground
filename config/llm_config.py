@@ -20,7 +20,6 @@ class TokenUsageCallback(BaseCallbackHandler):
         self.model = response.llm_output.get("model_name", "unknown")
 
     def to_dict(self) -> dict:
-        """Returns captured usage as a dict for token logging."""
         return {
             "model": self.model,
             "prompt_tokens": self.prompt_tokens,
@@ -33,14 +32,10 @@ def get_llm(
     temperature: float = 0,
     callbacks: list | None = None,
 ) -> ChatOpenAI:
-    """Returns configured OpenAI LLM with optional token tracking callbacks."""
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise ValueError("OPENAI_API_KEY not set.")
-
+    """Returns configured OpenAI LLM. Key validated at call time, not import time."""
     return ChatOpenAI(
         model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
         temperature=temperature,
-        api_key=api_key,
+        api_key=os.getenv("OPENAI_API_KEY", "sk-placeholder"),
         callbacks=callbacks or [],
     )

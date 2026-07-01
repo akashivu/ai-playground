@@ -1,7 +1,6 @@
 import os
 
 REQUIRED_ENV_VARS = [
-    "GROQ_API_KEY",
     "OPENAI_API_KEY",
     "ACTIVE_DOMAIN",
 ]

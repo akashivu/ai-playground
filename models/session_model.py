@@ -13,3 +13,7 @@ class ConversationMessage(BaseModel):
 class SessionMessagesResponse(BaseModel):
     session_id: str
     messages: list[ConversationMessage]
+
+class DeleteSessionResponse(BaseModel):
+    status: str
+    session_id: str
