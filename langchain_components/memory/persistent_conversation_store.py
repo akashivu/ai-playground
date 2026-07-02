@@ -239,38 +239,34 @@ class PersistentConversationStore:
                 "DELETE FROM recommendation_sessions WHERE user_id = ? AND session_id = ?",
                 (user_id, session_id)
             )
-            
-        def get_user_sessions(self, user_id: str) -> list[dict]:
 
-    
-
-            with self._connect() as conn:
-
-                rows = conn.execute("""
+    def get_user_sessions(self, user_id: str) -> list[dict]:
+        """Returns all sessions for a user, most recently active first."""
+        with self._connect() as conn:
+            rows = conn.execute("""
                 SELECT session_id, created_at, last_active
                 FROM sessions
                 WHERE user_id = ?
                 ORDER BY last_active DESC
-                """, (user_id,)).fetchall()
+            """, (user_id,)).fetchall()
+        return [dict(row) for row in rows]
 
-            return [dict(row) for row in rows]
-        def delete_session(self, user_id: str, session_id: str) -> None:
-                """Deletes a conversation and all its messages."""
-                with self._connect() as conn:
-                    conn.execute(
-                    "DELETE FROM messages WHERE user_id = ? AND session_id = ?",
-                    (user_id, session_id)
-                    )
-                    conn.execute(
-                    "DELETE FROM sessions WHERE user_id = ? AND session_id = ?",
-                    (user_id, session_id)
-                    )
-        def touch_session(self, user_id: str, session_id: str) -> None:
-                """Updates the last activity timestamp for a session."""
-                with self._connect() as conn:
-                    conn.execute("""
-                    UPDATE sessions SET last_active = ?
-                    WHERE user_id = ? AND session_id = ?
-                    """, (self._now(), user_id, session_id))
+    def delete_session(self, user_id: str, session_id: str) -> None:
+        """Deletes a conversation and all its messages."""
+        with self._connect() as conn:
+            conn.execute(
+                "DELETE FROM messages WHERE user_id = ? AND session_id = ?",
+                (user_id, session_id)
+            )
+            conn.execute(
+                "DELETE FROM sessions WHERE user_id = ? AND session_id = ?",
+                (user_id, session_id)
+            )
 
-        
+    def touch_session(self, user_id: str, session_id: str) -> None:
+        """Updates the last activity timestamp for a session."""
+        with self._connect() as conn:
+            conn.execute("""
+                UPDATE sessions SET last_active = ?
+                WHERE user_id = ? AND session_id = ?
+            """, (self._now(), user_id, session_id))
