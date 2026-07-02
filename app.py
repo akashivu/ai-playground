@@ -78,12 +78,13 @@ async def log_request(request: Request, call_next):
     return response
 
 @app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    """Catches unhandled exceptions and returns a safe error response."""
+async def global_exception_handler(request: Request, exc: Exception):
     logger.exception(f"Unhandled exception on {request.method} {request.url.path}: {exc}")
     return JSONResponse(
         status_code=500,
-        content={"error": "Internal server error."},
+        content={
+            "error": str(exc),   # Debug only
+        },
     )
 
 app.mount("/admin/static", StaticFiles(directory="frontend/admin"), name="admin")
