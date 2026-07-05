@@ -55,6 +55,6 @@ class ConversationalRAGService:
                  to answer the question."""
          answer = await (generate_rag_response(prompt))
 
-         evaluation = await ( self.evaluation_service.evaluate( latest_question,  context,answer,))
+         evaluation = await (self.evaluation_service.evaluate( latest_question,  context,answer,))
 
          return {"answer": answer, "evaluation": evaluation,}
