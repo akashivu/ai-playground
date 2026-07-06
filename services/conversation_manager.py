@@ -11,7 +11,8 @@ from services.usage_tracking_service import usage_tracking_service
 from services.token_tracking_service import token_tracking_service
 from services.cost_estimation_service import cost_estimation_service
 from config.settings import settings
-
+from langchain_components.routing.intent_router import execute_workflow
+from langchain_components.routing.intent_types import IntentType
 
 class ConversationManager:
     """Central orchestration service for AI conversations."""
@@ -64,7 +65,13 @@ class ConversationManager:
 
     def _execute_workflow(self, state: ConversationState) -> dict:
         start = time.perf_counter()
-        result = route_question(state.model_dump())
+        if state.booking_details:
+            result = execute_workflow(
+        intent=IntentType.BOOKING,
+        state=state.model_dump(),
+        )
+        else:
+            result = route_question(state.model_dump())
         latency = time.perf_counter() - start
 
         logger.info(
