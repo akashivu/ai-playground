@@ -4,13 +4,10 @@ from auth.schemas import CurrentUser
 from models.ai_response import AIResponse
 from models.conversation_state import ConversationState
 from langchain_components.routing.intent_router import route_question
-from langchain_components.routing.intent_types import IntentType
-from langchain_components.workflows.workflow_executor import WorkflowExecutor
-_executor = WorkflowExecutor()
-execute_workflow = _executor.execute
 from core.dependencies import conversation_store
 from services.recommendation_session_service import recommendation_session_service
 from services.booking_session_service import booking_session_service
+from services.itinerary_session_service import itinerary_session_service
 from services.usage_tracking_service import usage_tracking_service
 from services.token_tracking_service import token_tracking_service
 from services.cost_estimation_service import cost_estimation_service
@@ -41,7 +38,7 @@ class ConversationManager:
         session_id: str,
         question: str,
     ) -> ConversationState:
-        user_id = session_id if current_user.is_guest else current_user.user_id
+        user_id = current_user.user_id
 
         history = conversation_store.get_messages(
             user_id=user_id,
@@ -55,6 +52,10 @@ class ConversationManager:
             user_id=user_id,
             session_id=session_id,
         )
+        previous_itinerary = itinerary_session_service.get(
+            user_id=user_id,
+            session_id=session_id,
+        )
 
         return ConversationState(
             session_id=session_id,
@@ -65,20 +66,21 @@ class ConversationManager:
             history=history,
             booking_details=booking_details,
             recommendation_details=previous_recommendation,
+            itinerary_details=previous_itinerary,
         )
 
     def _execute_workflow(self, state: ConversationState) -> dict:
         start = time.perf_counter()
-<<<<<<< HEAD
-=======
-        logger.info(f"Loaded booking_details: {state.booking_details}")
-        logger.info(f"Session ID: {state.session_id}")
->>>>>>> bb5eaae (fix: update AI workflows and production configuration)
         if state.booking_details:
             result = execute_workflow(
-        intent=IntentType.BOOKING,
-        state=state.model_dump(),
-        )
+                intent=IntentType.BOOKING,
+                state=state.model_dump(),
+            )
+        elif state.itinerary_details:
+            result = execute_workflow(
+                intent=IntentType.ITINERARY,
+                state=state.model_dump(),
+            )
         else:
             result = route_question(state.model_dump())
         latency = time.perf_counter() - start
@@ -153,12 +155,23 @@ class ConversationManager:
                 recommendation=result["recommendation_details"],
             )
 
+        if "itinerary_details" in result:
+            itinerary_session_service.save(
+                user_id=user_id,
+                session_id=session_id,
+                itinerary=result["itinerary_details"],
+            )
+
         if result.get("completed"):
             booking_session_service.clear_booking(
                 user_id=user_id,
                 session_id=session_id,
             )
             recommendation_session_service.clear(
+                user_id=user_id,
+                session_id=session_id,
+            )
+            itinerary_session_service.clear(
                 user_id=user_id,
                 session_id=session_id,
             )

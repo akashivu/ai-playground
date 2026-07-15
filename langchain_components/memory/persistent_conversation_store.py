@@ -5,7 +5,7 @@ from datetime import datetime, UTC
 
 
 class PersistentConversationStore:
-    """SQLite-backed conversation store with booking and recommendation session support."""
+    """SQLite-backed conversation store with booking, recommendation, and itinerary session support."""
 
     def __init__(self, db_path: str = "data/conversations.db") -> None:
         os.makedirs(os.path.dirname(db_path), exist_ok=True)
@@ -75,6 +75,19 @@ class PersistentConversationStore:
             conn.execute("""
                 CREATE INDEX IF NOT EXISTS idx_recommendation_sessions
                     ON recommendation_sessions (user_id, session_id)
+            """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS itinerary_sessions (
+                    user_id        TEXT NOT NULL,
+                    session_id     TEXT NOT NULL,
+                    itinerary_data TEXT NOT NULL,
+                    updated_at     TEXT NOT NULL,
+                    PRIMARY KEY (user_id, session_id)
+                )
+            """)
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_itinerary_sessions
+                    ON itinerary_sessions (user_id, session_id)
             """)
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS usage_logs (
@@ -237,6 +250,36 @@ class PersistentConversationStore:
         with self._connect() as conn:
             conn.execute(
                 "DELETE FROM recommendation_sessions WHERE user_id = ? AND session_id = ?",
+                (user_id, session_id)
+            )
+
+    # --- itinerary session methods ---
+
+    def save_itinerary(self, user_id: str, session_id: str, itinerary_data: dict) -> None:
+        """Persists itinerary details for a user's session."""
+        with self._connect() as conn:
+            conn.execute("""
+                INSERT INTO itinerary_sessions (user_id, session_id, itinerary_data, updated_at)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(user_id, session_id) DO UPDATE SET
+                    itinerary_data = excluded.itinerary_data,
+                    updated_at     = excluded.updated_at
+            """, (user_id, session_id, json.dumps(itinerary_data), self._now()))
+
+    def get_itinerary(self, user_id: str, session_id: str) -> dict:
+        """Returns persisted itinerary details for a user's session."""
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT itinerary_data FROM itinerary_sessions WHERE user_id = ? AND session_id = ?",
+                (user_id, session_id)
+            ).fetchone()
+        return json.loads(row["itinerary_data"]) if row else {}
+
+    def clear_itinerary(self, user_id: str, session_id: str) -> None:
+        """Removes itinerary session data."""
+        with self._connect() as conn:
+            conn.execute(
+                "DELETE FROM itinerary_sessions WHERE user_id = ? AND session_id = ?",
                 (user_id, session_id)
             )
 

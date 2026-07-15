@@ -11,6 +11,7 @@ class IntentType(str, Enum):
     POLICY = "POLICY"
     GENERAL = "GENERAL"
     OUT_OF_DOMAIN = "OUT_OF_DOMAIN"
+    ITINERARY = "ITINERARY"
 
     @classmethod
     def values(cls) -> list[str]:

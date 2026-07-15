@@ -16,7 +16,11 @@ class ConversationState(BaseModel):
     booking_details: dict
     recommendation_details: dict
 
+
     @field_validator("user_id", mode="before")
     @classmethod
     def coerce_user_id_to_str(cls, v: Any) -> str:
         return str(v)
+
+    itinerary_details: dict
+

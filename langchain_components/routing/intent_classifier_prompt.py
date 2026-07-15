@@ -7,6 +7,8 @@ _INTENT_DEFINITIONS = (
     "BOOKING: Requests to book, reserve, schedule, or arrange a cab or service. "
     "Includes intercity, outstation, airport, local, and any city-to-city trips.\n"
     "RECOMMENDATION: Requests for trip suggestions, vehicle recommendations, or travel plans.\n"
+    "ITINERARY: Requests to plan a trip, create a day-wise itinerary, vacation plan, travel schedule, places "
+    "to visit, or a full multi-day travel plan for a destination.\n"
     "PRICING: Any question about cost, fare, price, rate, or charges for a trip or service.\n"
     "ITINERARY: Requests to plan a trip, create a day-wise travel plan, or get an itinerary. "
     "Includes requests mentioning days, places to visit, travel schedule, or trip planning.\n"
@@ -17,6 +19,7 @@ _INTENT_DEFINITIONS = (
 
 _EXAMPLES = (
     "Examples:\n"
+<<<<<<< HEAD
     "User: How much is airport pickup? -> PRICING\n"
     "User: What is the fare for Mysore? -> PRICING\n"
     "User: Cab cost to Bangalore airport? -> PRICING\n"
@@ -38,6 +41,22 @@ _EXAMPLES = (
     "User: Write Python code -> OUT_OF_DOMAIN\n"
     "User: Hello -> GENERAL\n"
     "User: What is machine learning? -> OUT_OF_DOMAIN\n"
+=======
+    "User: How much is airport pickup? → PRICING\n"
+    "User: What is the fare for Mysore? → PRICING\n"
+    "User: Cab cost to Bangalore airport? → PRICING\n"
+    "User: Price for one-way trip? → PRICING\n"
+    "User: What is the round-trip cost? → PRICING\n"
+    "User: Book a cab to Coorg → BOOKING\n"
+    "User: What vehicles do you have? → FAQ\n"
+    "User: Suggest a 3-day trip → RECOMMENDATION\n"
+    "User: Plan a 5-day trip to Goa → ITINERARY\n"
+    "User: Create itinerary for Kerala → ITINERARY\n"
+    "User: Places to visit in Mysore → ITINERARY\n"
+    "User: Plan my vacation → ITINERARY\n"
+    "User: Write Python code → OUT_OF_DOMAIN\n"
+    "User: Hello → GENERAL\n"
+>>>>>>> 735d1e3 (feat: add conversational itinerary planner)
 )
 
 intent_classifier_prompt = PromptTemplate(
