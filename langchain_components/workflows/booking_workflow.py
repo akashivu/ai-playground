@@ -9,7 +9,7 @@ from services.booking_orchestrator import booking_orchestrator
 from services.booking_prompt_service import get_next_question
 from services.booking_session_service import booking_session_service
 from services.booking_validation_service import find_missing_fields
-
+from utils.logger import logger
 
 @register_workflow(IntentType.BOOKING)
 def booking_workflow(state: dict) -> dict:
@@ -38,10 +38,21 @@ def booking_workflow(state: dict) -> dict:
     #
     extracted = booking_extraction_chain.invoke({"question": state["question"]})
     merged_booking = booking_session_service.merge_booking(previous_booking, extracted)
-
+    booking_session_service.save_booking(
+    user_id=state["user_id"],
+    session_id=state["session_id"],
+    booking=merged_booking,
+    )
     #
     # Check missing fields.
     #
+    logger.info("=" * 80)
+    logger.info("MERGED BOOKING: %s", merged_booking)
+
+    missing = find_missing_fields(merged_booking)
+
+    logger.info("MISSING FIELDS: %s", missing)
+    logger.info("=" * 80)
     missing = find_missing_fields(merged_booking)
     if missing:
         return {

@@ -16,6 +16,48 @@ Rules:
 - Keep dates exactly as provided if normalization is not possible.
 - Keep phone numbers exactly as written.
 - Preserve email addresses exactly.
+Trip field mapping (VERY IMPORTANT):
+
+trip_category:
+- Outstation
+- Airport Transfer
+- Rental
+
+trip_type:
+- One Way
+- Round Trip
+
+Examples:
+
+User: "Outstation"
+Output:
+{{
+  "trip_category": "Outstation"
+}}
+
+User: "Airport Transfer"
+Output:
+{{
+  "trip_category": "Airport Transfer"
+}}
+
+User: "Rental"
+Output:
+{{
+  "trip_category": "Rental"
+}}
+
+User: "One Way"
+Output:
+{{
+  "trip_type": "One Way"
+}}
+
+User: "Round Trip"
+Otput:
+{{
+  "trip_type": "Round Trip"
+}}
 - Vehicle types should be simple values such as:
   Sedan
   SUV

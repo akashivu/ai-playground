@@ -7,10 +7,15 @@ from services.retrieval_validator import RetrievalValidator
 @register_workflow(IntentType.POLICY)
 def policy_workflow(state: dict) -> dict:
     """Retrieves policy information from the adiyogicabz_policy knowledge collection."""
+    print("========== POLICY WORKFLOW EXECUTED ==========")
+    print("STATE:", state)
     results = hybrid_search_pipeline.invoke({
         "query": state["question"],
         "collection": "adiyogicabz_policy",
     })
+    print("========== POLICY WORKFLOW EXECUTED ==========")
+    print("QUESTION:", state["question"])
+    print("RESULTS:", results)
 
     validation = RetrievalValidator.validate(results)
     if not validation.is_valid:

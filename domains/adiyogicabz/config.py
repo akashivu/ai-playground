@@ -9,4 +9,5 @@ ENABLED_INTENTS = [
     IntentType.BOOKING,
     IntentType.RECOMMENDATION,
     IntentType.PRICING,
+    IntentType.POLICY,
 ]

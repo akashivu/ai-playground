@@ -11,13 +11,20 @@ def classify_intent(question: str) -> IntentType:
     """Classifies and validates the user's intent from a question string."""
     result = intent_classifier_chain.invoke({"question": question})
 
+    print("=" * 60)
+    print("QUESTION:", question)
+    print("RAW LLM RESULT:", result)
+    print("=" * 60)
+
     try:
         intent = IntentType(result.get("intent", "GENERAL"))
     except ValueError:
         intent = IntentType.GENERAL
 
     try:
-        return validate_intent(intent)
+         intent = validate_intent(intent)
+         print("FINAL INTENT:", intent)
+         return intent
     except ValueError:
         return IntentType.GENERAL
 

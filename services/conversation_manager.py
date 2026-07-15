@@ -4,6 +4,10 @@ from auth.schemas import CurrentUser
 from models.ai_response import AIResponse
 from models.conversation_state import ConversationState
 from langchain_components.routing.intent_router import route_question
+from langchain_components.routing.intent_types import IntentType
+from langchain_components.workflows.workflow_executor import WorkflowExecutor
+_executor = WorkflowExecutor()
+execute_workflow = _executor.execute
 from core.dependencies import conversation_store
 from services.recommendation_session_service import recommendation_session_service
 from services.booking_session_service import booking_session_service
@@ -37,7 +41,7 @@ class ConversationManager:
         session_id: str,
         question: str,
     ) -> ConversationState:
-        user_id = current_user.user_id
+        user_id = session_id if current_user.is_guest else current_user.user_id
 
         history = conversation_store.get_messages(
             user_id=user_id,
@@ -65,6 +69,11 @@ class ConversationManager:
 
     def _execute_workflow(self, state: ConversationState) -> dict:
         start = time.perf_counter()
+<<<<<<< HEAD
+=======
+        logger.info(f"Loaded booking_details: {state.booking_details}")
+        logger.info(f"Session ID: {state.session_id}")
+>>>>>>> bb5eaae (fix: update AI workflows and production configuration)
         if state.booking_details:
             result = execute_workflow(
         intent=IntentType.BOOKING,

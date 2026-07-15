@@ -12,15 +12,17 @@ BOOKING_PROMPTS = {
     ),
 
     "trip_category": (
-        "Which type of booking would you like?\n\n"
-        "• One Way\n"
-        "• Round Trip\n"
+        "Which booking category would you like?\n\n"
+        "• Outstation\n"
         "• Airport Transfer\n"
         "• Rental"
     ),
+  
 
     "trip_type": (
-        "Please specify your trip type."
+        "Would you like:\n\n"
+        "• One Way\n"
+        "• Round Trip"
     ),
 
     "pickup_location": (

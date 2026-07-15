@@ -5,4 +5,5 @@ __pycache__/
 
 # Runtime data
 data/
-logs/
+logs/faiss.index
+metadata.json
