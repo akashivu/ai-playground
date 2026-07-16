@@ -19,7 +19,7 @@ _INTENT_DEFINITIONS = (
 
 _EXAMPLES = (
     "Examples:\n"
-<<<<<<< HEAD
+
     "User: How much is airport pickup? -> PRICING\n"
     "User: What is the fare for Mysore? -> PRICING\n"
     "User: Cab cost to Bangalore airport? -> PRICING\n"
@@ -41,7 +41,6 @@ _EXAMPLES = (
     "User: Write Python code -> OUT_OF_DOMAIN\n"
     "User: Hello -> GENERAL\n"
     "User: What is machine learning? -> OUT_OF_DOMAIN\n"
-=======
     "User: How much is airport pickup? → PRICING\n"
     "User: What is the fare for Mysore? → PRICING\n"
     "User: Cab cost to Bangalore airport? → PRICING\n"
@@ -56,7 +55,7 @@ _EXAMPLES = (
     "User: Plan my vacation → ITINERARY\n"
     "User: Write Python code → OUT_OF_DOMAIN\n"
     "User: Hello → GENERAL\n"
->>>>>>> 735d1e3 (feat: add conversational itinerary planner)
+
 )
 
 intent_classifier_prompt = PromptTemplate(

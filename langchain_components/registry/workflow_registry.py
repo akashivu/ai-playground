@@ -11,6 +11,7 @@ from langchain_components.workflows.faq_workflow import faq_workflow
 from langchain_components.workflows.pricing_workflow import pricing_workflow
 from langchain_components.workflows.policy_workflow import policy_workflow
 from langchain_components.workflows.out_of_domain_workflow import out_of_domain_workflow
+from langchain_components.workflows.itinerary_workflow import itinerary_workflow
 
 WORKFLOWS: dict[IntentType, Callable] = {
     IntentType.GENERAL: general_chat_workflow,
@@ -22,4 +23,5 @@ WORKFLOWS: dict[IntentType, Callable] = {
     IntentType.PRICING: pricing_workflow,
     IntentType.POLICY: policy_workflow,
     IntentType.OUT_OF_DOMAIN: out_of_domain_workflow,
+    IntentType.ITINERARY: itinerary_workflow,
 }

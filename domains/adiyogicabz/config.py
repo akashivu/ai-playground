@@ -10,4 +10,7 @@ ENABLED_INTENTS = [
     IntentType.RECOMMENDATION,
     IntentType.PRICING,
     IntentType.POLICY,
+    IntentType.ITINERARY,
+    IntentType.BOOKING_STATUS,
+    IntentType.OUT_OF_DOMAIN,
 ]

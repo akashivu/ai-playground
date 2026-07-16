@@ -10,13 +10,13 @@ Extract ONLY the information explicitly mentioned.
 
 Return JSON only.
 
-{
+{{
   "destination": null,
   "days": null,
   "budget": null,
   "travelers": null,
   "interests": null
-}
+}}
 
 Question:
 

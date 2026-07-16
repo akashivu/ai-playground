@@ -43,14 +43,14 @@ def itinerary_workflow(
         or {}
     )
 
-    extracted = (
-        itinerary_extraction_chain.invoke(
-            {
-                "question":
-                    state["question"]
-            }
-        )
+    extracted = itinerary_extraction_chain.invoke(
+    {
+        "question": state["question"]
+    }
     )
+
+    
+        
 
     itinerary = (
         itinerary_session_service.merge(
