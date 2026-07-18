@@ -41,10 +41,7 @@ _EXAMPLES = (
     "User: Write Python code -> OUT_OF_DOMAIN\n"
     "User: Hello -> GENERAL\n"
     "User: What is machine learning? -> OUT_OF_DOMAIN\n"
-<<<<<<< HEAD
-=======
 
->>>>>>> d692b09 (feat(chat): support persistent guest identity for anonymous users)
     "User: How much is airport pickup? → PRICING\n"
     "User: What is the fare for Mysore? → PRICING\n"
     "User: Cab cost to Bangalore airport? → PRICING\n"
@@ -70,12 +67,20 @@ intent_classifier_prompt = PromptTemplate(
         "examples": _EXAMPLES,
     },
     template=(
-        "You are an intent classifier for a travel and cab booking platform.\n\n"
-        "Intent definitions:\n{intent_definitions}\n\n"
-        "{examples}\n"
-        "Valid intents: {valid_intents}\n\n"
-        "Question:\n{question}\n\n"
-        "Return JSON only.\n"
-        '{{"intent": "GENERAL"}}'
-    ),
+    "You are an intent classifier for a travel and cab booking platform.\n\n"
+
+    "Intent definitions:\n"
+    "{intent_definitions}\n\n"
+
+    "{examples}\n"
+
+    "Valid intents:\n"
+    "{valid_intents}\n\n"
+
+    "Question:\n"
+    "{question}\n\n"
+
+    "Respond ONLY with valid JSON in exactly this format:\n"
+    '{"intent":"<VALID_INTENT>"}'
+)
 )
