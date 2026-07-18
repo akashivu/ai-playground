@@ -10,6 +10,7 @@ class Message(BaseModel):
 class ChatRequest(BaseModel):
     session_id: str
     question: str
+    guest_id: str | None = None
 
 
 class SearchRequest(BaseModel):
