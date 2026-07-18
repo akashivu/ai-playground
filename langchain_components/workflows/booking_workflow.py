@@ -88,7 +88,7 @@ def booking_workflow(state: dict) -> dict:
         return {
             "answer": result.message,
             "booking_details": merged_booking,
-            "completed": False,
+            "completed": True,
         }
 
     #

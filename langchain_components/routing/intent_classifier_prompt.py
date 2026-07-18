@@ -3,6 +3,7 @@ from langchain_components.routing.intent_types import IntentType
 
 _INTENT_DEFINITIONS = (
     "FAQ: Frequently asked questions about policies, services, or business rules.\n"
+    "POLICY: Questions about company policies, including cancellation, refunds, rescheduling, payments, waiting charges, luggage, driver rules, tolls, privacy, terms and conditions, and booking rules.\n"
     "KNOWLEDGE_SEARCH: Questions requiring retrieval from documents, guides, or knowledge base.\n"
     "BOOKING: Requests to book, reserve, schedule, or arrange a cab or service. "
     "Includes intercity, outstation, airport, local, and any city-to-city trips.\n"
@@ -56,6 +57,18 @@ _EXAMPLES = (
     "User: Plan my vacation → ITINERARY\n"
     "User: Write Python code → OUT_OF_DOMAIN\n"
     "User: Hello → GENERAL\n"
+
+    "User: What is your cancellation policy? -> POLICY\n"
+    "User: Can I cancel my booking? -> POLICY\n"
+    "User: Is there a refund? -> POLICY\n"
+    "User: What happens if I cancel within 24 hours? -> POLICY\n"
+    "User: What is your refund policy? -> POLICY\n"
+    "User: Are toll charges included? -> POLICY\n"
+    "User: Is driver allowance extra? -> POLICY\n"
+    "User: What are your waiting charges? -> POLICY\n"
+    "User: Can I carry pets? -> POLICY\n"
+    "User: What is your luggage policy? -> POLICY\n"
+    "User: What are your payment terms? -> POLICY\n"
 
 )
 
