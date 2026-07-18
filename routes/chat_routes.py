@@ -4,8 +4,8 @@ from services.rate_limit_service import rate_limit_service
 from services.conversation_manager import conversation_manager
 from utils.logger import logger
 from auth.schemas import CurrentUser
-from core.dependencies import get_current_user
 from auth.optional_auth import get_current_or_guest_user
+
 router = APIRouter()
 
 
@@ -14,6 +14,11 @@ async def chat(
     body: ChatRequest,
     current_user: CurrentUser = Depends(get_current_or_guest_user),
 ) -> ChatResponse:
+
+    
+    if current_user.is_guest and body.guest_id:
+        current_user.user_id = body.guest_id
+
     if not rate_limit_service.allow_request(
         user_id=str(current_user.user_id),
         session_id=body.session_id,
@@ -29,11 +34,9 @@ async def chat(
             session_id=body.session_id,
             question=body.question,
         )
-        return ChatResponse(
-            session_id=response.session_id,
-            answer=response.answer,
-        )
+
+        return ChatResponse(session_id=response.session_id,answer=response.answer,)
 
     except Exception:
         logger.exception("Chat endpoint failed")
-        raise HTTPException(status_code=500, detail="Internal server error.")
+        raise HTTPException(status_code=500,detail="Internal server error.",)

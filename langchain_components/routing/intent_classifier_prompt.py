@@ -41,6 +41,10 @@ _EXAMPLES = (
     "User: Write Python code -> OUT_OF_DOMAIN\n"
     "User: Hello -> GENERAL\n"
     "User: What is machine learning? -> OUT_OF_DOMAIN\n"
+<<<<<<< HEAD
+=======
+
+>>>>>>> d692b09 (feat(chat): support persistent guest identity for anonymous users)
     "User: How much is airport pickup? → PRICING\n"
     "User: What is the fare for Mysore? → PRICING\n"
     "User: Cab cost to Bangalore airport? → PRICING\n"
