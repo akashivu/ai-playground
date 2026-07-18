@@ -81,6 +81,6 @@ intent_classifier_prompt = PromptTemplate(
     "{question}\n\n"
 
     "Respond ONLY with valid JSON in exactly this format:\n"
-    '{"intent":"<VALID_INTENT>"}'
+    '{{"intent":"<VALID_INTENT>"}}'
 )
 )
