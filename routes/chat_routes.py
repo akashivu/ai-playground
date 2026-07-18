@@ -18,6 +18,11 @@ async def chat(
     
     if current_user.is_guest and body.guest_id:
         current_user.user_id = body.guest_id
+        logger.info(
+            "CHAT user=%s session=%s",
+            current_user.user_id,
+            body.session_id,
+        )
 
     if not rate_limit_service.allow_request(
         user_id=str(current_user.user_id),
