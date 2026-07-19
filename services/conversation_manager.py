@@ -14,6 +14,8 @@ from services.cost_estimation_service import cost_estimation_service
 from config.settings import settings
 from langchain_components.routing.intent_router import execute_workflow
 from langchain_components.routing.intent_types import IntentType
+from langchain_components.routing.conversation_control import classify_conversation_control
+from langchain_components.routing.conversation_control_prompt import ConversationControl
 
 class ConversationManager:
     """Central orchestration service for AI conversations."""
@@ -71,11 +73,9 @@ class ConversationManager:
 
     def _execute_workflow(self, state: ConversationState) -> dict:
         start = time.perf_counter()
+
         if state.booking_details:
-            result = execute_workflow(
-                intent=IntentType.BOOKING,
-                state=state.model_dump(),
-            )
+            result = self._handle_active_booking(state)
         elif state.itinerary_details:
             result = execute_workflow(
                 intent=IntentType.ITINERARY,
@@ -83,6 +83,7 @@ class ConversationManager:
             )
         else:
             result = route_question(state.model_dump())
+
         latency = time.perf_counter() - start
 
         logger.info(
@@ -97,6 +98,62 @@ class ConversationManager:
             **result,
             "latency": latency,
         }
+
+    def _handle_active_booking(self, state: ConversationState) -> dict:
+        """
+        There is an active booking in progress for this session. Before routing
+        to the booking workflow, check whether the user's message is actually a
+        control signal (cancel/pause/interrupt) rather than a direct answer to
+        the current booking question.
+        """
+        control = classify_conversation_control(state.question)
+
+        logger.info(
+            "ConversationControl=%s User=%s Session=%s",
+            control,
+            state.user_id,
+            state.session_id,
+        )
+
+        if control == ConversationControl.CANCEL:
+            return {
+                "answer": "I've cancelled your booking request. How else can I help you?",
+                "intent": IntentType.BOOKING,
+                "completed": True,
+                "booking_details": None,
+            }
+
+        if control == ConversationControl.PAUSE:
+            # Keep booking_details as-is (do NOT clear) so it can be resumed later.
+            return {
+                "answer": (
+                    "No problem, I've paused your booking. "
+                    "Just say 'continue' whenever you're ready to pick it back up."
+                ),
+                "intent": IntentType.BOOKING,
+                "completed": False,
+            }
+
+        if control == ConversationControl.INTERRUPT:
+            faq_result = route_question(state.model_dump())
+            faq_answer = faq_result.get("answer", "")
+            return {
+                **faq_result,
+                "answer": (
+                    f"{faq_answer}\n\n"
+                    "We were in the middle of your booking. Would you like to continue?"
+                ),
+                # booking_details untouched -> booking stays active for next turn
+                "completed": False,
+            }
+
+        # RESUME or NONE: treat the message as a direct answer to the booking
+        # workflow's current question (RESUME is just an explicit confirmation
+        # to keep going; NONE means no control signal was detected at all).
+        return execute_workflow(
+            intent=IntentType.BOOKING,
+            state=state.model_dump(),
+        )
 
     def _track_usage(
         self,
