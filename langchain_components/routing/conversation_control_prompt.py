@@ -19,7 +19,8 @@ from langchain_core.prompts import ChatPromptTemplate
 class ConversationControl(str, Enum):
     NONE = "NONE"
     CANCEL = "CANCEL"
-    PAUSE = "PAUSE"
+    PAUSE = "PAUSE"  # Reserved for Stage 2 (requires persisted booking status). Not
+                      # actively classified yet — see conversation_control.py.
     RESUME = "RESUME"
     INTERRUPT = "INTERRUPT"
 
@@ -33,10 +34,6 @@ latest message into exactly one of the following control signals:
 - CANCEL: The user wants to stop/abandon/exit the booking entirely. They do not want to \
   continue it later. Signals: "stop booking", "cancel booking", "never mind", "exit", \
   "forget it", "I don't want to book anymore".
-
-- PAUSE: The user wants to stop the booking for now, but implies they may come back to it \
-  later (a soft, resumable stop) — distinct from a hard CANCEL. Signals: "hold on", \
-  "pause this", "let me think about it", "give me a minute", "I'll finish this later".
 
 - RESUME: The user is agreeing to continue, confirming, or picking the booking back up \
   after an interruption or pause. Signals: "yes", "continue", "okay", "let's continue", \
