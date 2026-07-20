@@ -1,7 +1,7 @@
 from langchain_components.registry.workflow_decorator import register_workflow
 from langchain_components.routing.intent_types import IntentType
 from langchain_components.runnables.hybrid_search_pipeline import hybrid_search_pipeline
-from langchain_components.chains.policy_chain import policy_chain
+from langchain_components.chains.policy_chain import get_policy_chain
 from services.retrieval_validator import RetrievalValidator
 
 
@@ -31,7 +31,7 @@ def policy_workflow(state: dict) -> dict:
 
     context = "\n\n".join(result["chunk"] for result in results[:3])
 
-    response = policy_chain.invoke({
+    response = get_policy_chain().invoke({
         "context": context,
         "question": state["question"],
     })
