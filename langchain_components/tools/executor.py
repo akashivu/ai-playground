@@ -22,7 +22,11 @@ from langchain_components.tools.permissions import (
     enforce,
 )
 from langchain_components.tools.registry import ToolRegistry, tool_registry
-from langchain_components.tools.schemas import ToolAuditRecord, ToolCallContext, ToolResult
+from langchain_components.tools.schemas import (
+    ToolAuditRecord,
+    ToolCallContext,
+    ToolResult,
+)
 
 logger = logging.getLogger("tools.executor")
 
@@ -44,7 +48,13 @@ def _default_audit_sink(record: ToolAuditRecord) -> None:
 
 
 class ToolExecutor:
-    
+    """The ONLY component permitted to invoke a tool's execute().
+
+    Owns: input validation, authorization, timeout enforcement,
+    retries, metrics, logging, audit trail, and exception translation.
+    Agents/planners call `executor.run(...)` — never `tool.execute(...)`
+    directly.
+    """
 
     def __init__(
         self,
@@ -59,6 +69,10 @@ class ToolExecutor:
         self._audit_sink = audit_sink
         self._metrics = metrics or NoOpMetricsSink()
         self._hooks = hooks or ExecutorHooks()
+
+    @property
+    def registry(self) -> ToolRegistry:
+        return self._registry
 
     async def run(
         self,
@@ -75,14 +89,18 @@ class ToolExecutor:
         start = time.perf_counter()
 
         try:
-            enforce(self._permission_checker, context, tool.name, tool.requires_permission)
+            enforce(
+                self._permission_checker, context, tool.name, tool.requires_permission
+            )
             validated = self._validate(tool.name, tool.schema, raw_input)
         except (ToolPermissionError, ToolValidationError) as exc:
             duration_ms = (time.perf_counter() - start) * 1000
             error_result = ToolResult.fail(
                 error=str(exc), tool_name=tool.name, duration_ms=duration_ms, retries=0
             )
-            self._audit_invalid(context, tool.name, raw_input, error_result, duration_ms)
+            self._audit_invalid(
+                context, tool.name, raw_input, error_result, duration_ms
+            )
             self._hooks.fire_error(tool.name, context, exc)
             self._metrics.record_duration(tool.name, duration_ms)
             self._metrics.increment_failure(tool.name)
@@ -103,7 +121,9 @@ class ToolExecutor:
                 result.tool_name = tool.name
                 result.duration_ms = duration_ms
                 result.retries = retries_used
-                self._audit(context, tool.name, validated, result, duration_ms, retries_used)
+                self._audit(
+                    context, tool.name, validated, result, duration_ms, retries_used
+                )
                 self._metrics.record_duration(tool.name, duration_ms)
                 self._metrics.increment_success(tool.name)
                 self._hooks.fire_after(tool.name, context, result)
@@ -133,7 +153,9 @@ class ToolExecutor:
             duration_ms=duration_ms,
             retries=retries_used,
         )
-        self._audit(context, tool.name, validated, error_result, duration_ms, retries_used)
+        self._audit(
+            context, tool.name, validated, error_result, duration_ms, retries_used
+        )
         self._metrics.record_duration(tool.name, duration_ms)
         if isinstance(last_error, ToolTimeoutError):
             self._metrics.increment_timeout(tool.name)
@@ -143,7 +165,9 @@ class ToolExecutor:
         return error_result
 
     @staticmethod
-    def _validate(tool_name: str, schema: type[BaseModel], raw_input: dict[str, Any]) -> BaseModel:
+    def _validate(
+        tool_name: str, schema: type[BaseModel], raw_input: dict[str, Any]
+    ) -> BaseModel:
         try:
             return schema.model_validate(raw_input)
         except ValidationError as exc:
@@ -159,7 +183,12 @@ class ToolExecutor:
         retries: int,
     ) -> None:
         self._emit_audit(
-            context, tool_name, validated_input.model_dump(), result, duration_ms, retries
+            context,
+            tool_name,
+            validated_input.model_dump(),
+            result,
+            duration_ms,
+            retries,
         )
 
     def _audit_invalid(
