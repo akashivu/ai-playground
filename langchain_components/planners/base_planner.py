@@ -4,7 +4,7 @@ import abc
 from typing import Any, ClassVar
 
 from langchain_components.planners.context import PlannerContext
-from langchain_components.planners.result import ExecutionPlan
+from langchain_components.planners.result import PlanningResult
 
 
 class BasePlanner(abc.ABC):
@@ -22,5 +22,5 @@ class BasePlanner(abc.ABC):
     @abc.abstractmethod
     async def create_plan(
         self, request: dict[str, Any], context: PlannerContext
-    ) -> ExecutionPlan:
+    ) -> PlanningResult:
         raise NotImplementedError

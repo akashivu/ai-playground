@@ -12,13 +12,20 @@ from langchain_components.planners.registry import (
     planner_registry,
     register_planner,
 )
-from langchain_components.planners.result import ExecutionPlan, PlanStep
+from langchain_components.planners.result import (
+    ExecutionPlan,
+    PlanningResult,
+    PlanningStatus,
+    PlanStep,
+)
 
 __all__ = [
     "BasePlanner",
     "PlannerContext",
     "ExecutionPlan",
     "PlanStep",
+    "PlanningResult",
+    "PlanningStatus",
     "PlannerError",
     "PlannerNotFoundError",
     "PlannerAlreadyRegisteredError",

@@ -8,6 +8,8 @@ from pydantic import BaseModel, Field
 
 
 class PlannerContext(BaseModel):
+    user_id: str | None = None
+    session_id: str | None = None
     intent: str | None = None
     conversation_history: list[dict[str, Any]] = Field(default_factory=list)
     retrieved_documents: list[dict[str, Any]] = Field(default_factory=list)

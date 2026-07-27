@@ -4,16 +4,11 @@ import time
 import uuid
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ToolResult(BaseModel):
-    """Uniform envelope returned by every tool execution.
-
-    Every tool, regardless of what it does, resolves to one of these.
-    Agents/planners only ever have to reason about this one shape.
-    """
-
+    
     success: bool
     data: Any = None
     error: str | None = None
@@ -33,6 +28,14 @@ class ToolResult(BaseModel):
 
 
 class ToolCallContext(BaseModel):
+    """Caller identity/context passed alongside a tool request.
+
+    Kept separate from a tool's own input schema so tools stay
+    ignorant of auth/session concerns — only the executor reads this.
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     session_id: str | None = None
     user_id: str | None = None
     agent_name: str | None = None
@@ -40,6 +43,7 @@ class ToolCallContext(BaseModel):
     task_id: str | None = None
     trace_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     requested_at: float = Field(default_factory=time.time)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ToolAuditRecord(BaseModel):

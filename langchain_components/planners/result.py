@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import time
 import uuid
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -33,3 +34,31 @@ class ExecutionPlan(BaseModel):
             if step.step_id == step_id:
                 return step
         return None
+
+
+class PlanningStatus(str, Enum):
+    READY = "ready"
+    NEED_MORE_INFORMATION = "need_more_information"
+
+
+class PlanningResult(BaseModel):
+    status: PlanningStatus
+    plan: ExecutionPlan | None = None
+    missing_fields: list[str] = Field(default_factory=list)
+    response: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @classmethod
+    def ready(cls, plan: ExecutionPlan, **kwargs: Any) -> "PlanningResult":
+        return cls(status=PlanningStatus.READY, plan=plan, **kwargs)
+
+    @classmethod
+    def need_more_information(
+        cls, response: str, missing_fields: list[str] | None = None, **kwargs: Any
+    ) -> "PlanningResult":
+        return cls(
+            status=PlanningStatus.NEED_MORE_INFORMATION,
+            response=response,
+            missing_fields=missing_fields or [],
+            **kwargs,
+        )

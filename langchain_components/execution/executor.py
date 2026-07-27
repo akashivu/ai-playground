@@ -67,7 +67,9 @@ class PlanExecutor:
             completed_step_ids.add(step.step_id)
 
         return ExecutionResult.ok(
-            step_results=step_results, execution_time_ms=self._elapsed(start)
+            step_results=step_results,
+            execution_time_ms=self._elapsed(start),
+            metadata=plan.metadata,
         )
 
     async def _run_step(
@@ -78,6 +80,7 @@ class PlanExecutor:
             session_id=context.session_id,
             user_id=context.user_id,
             trace_id=context.trace_id,
+            metadata=context.metadata,
         )
         try:
             tool_result = await tool_executor.run(

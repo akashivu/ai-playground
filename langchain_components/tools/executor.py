@@ -48,14 +48,7 @@ def _default_audit_sink(record: ToolAuditRecord) -> None:
 
 
 class ToolExecutor:
-    """The ONLY component permitted to invoke a tool's execute().
-
-    Owns: input validation, authorization, timeout enforcement,
-    retries, metrics, logging, audit trail, and exception translation.
-    Agents/planners call `executor.run(...)` — never `tool.execute(...)`
-    directly.
-    """
-
+    
     def __init__(
         self,
         registry: ToolRegistry | None = None,
@@ -115,7 +108,7 @@ class ToolExecutor:
             retries_used = attempt
             try:
                 result = await asyncio.wait_for(
-                    tool.execute(validated), timeout=tool.timeout_seconds
+                    tool.execute(validated, context), timeout=tool.timeout_seconds
                 )
                 duration_ms = (time.perf_counter() - start) * 1000
                 result.tool_name = tool.name
@@ -199,7 +192,7 @@ class ToolExecutor:
         result: ToolResult,
         duration_ms: float,
     ) -> None:
-        # Input never became a validated model, so log the raw payload as-is.
+        
         self._emit_audit(context, tool_name, raw_input, result, duration_ms, 0)
 
     def _emit_audit(

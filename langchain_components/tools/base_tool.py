@@ -5,14 +5,13 @@ from typing import ClassVar, Generic, TypeVar
 
 from pydantic import BaseModel
 
-from langchain_components.tools.schemas import ToolResult
+from langchain_components.tools.schemas import ToolCallContext, ToolResult
 
 RequestT = TypeVar("RequestT", bound=BaseModel)
 
 
 class BaseTool(abc.ABC, Generic[RequestT]):
     
-
     name: ClassVar[str]
     description: ClassVar[str]
     schema: ClassVar[type[BaseModel]]
@@ -29,11 +28,9 @@ class BaseTool(abc.ABC, Generic[RequestT]):
             return  # allow intermediate abstract subclasses
         for attr in ("name", "description", "schema"):
             if getattr(cls, attr, None) is None:
-                raise TypeError(
-                    f"{cls.__name__} must define class attribute '{attr}'"
-                )
+                raise TypeError(f"{cls.__name__} must define class attribute '{attr}'")
 
     @abc.abstractmethod
-    async def execute(self, request: RequestT) -> ToolResult:
+    async def execute(self, request: RequestT, context: ToolCallContext) -> ToolResult:
         
         raise NotImplementedError
