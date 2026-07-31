@@ -1,169 +1,95 @@
 from __future__ import annotations
 
-import abc
-import time
-from typing import Any, ClassVar
+import asyncio
+from typing import Any
 
-from langchain_components.agents.context import AgentContext
-from langchain_components.agents.exceptions import ExecutionError, PlanningError
-from langchain_components.agents.result import AgentResult
-from langchain_components.execution.context import ExecutionContext
-from langchain_components.execution.executor import PlanExecutor
-from langchain_components.execution.executor import (
-    plan_executor as default_plan_executor,
-)
-from langchain_components.execution.result import ExecutionResult
 from langchain_components.planners.base_planner import BasePlanner
 from langchain_components.planners.context import PlannerContext
-from langchain_components.planners.result import PlanningResult, PlanningStatus
-from langchain_components.tools.executor import ToolExecutor
-from langchain_components.tools.executor import tool_executor as default_tool_executor
+from langchain_components.planners.registry import register_planner
+from langchain_components.planners.result import ExecutionPlan, PlanningResult, PlanStep
+
+from langchain_components.chains.booking_extraction_chain import (
+    booking_extraction_chain,
+)
+from services.booking_prompt_service import get_next_question
+from services.booking_session_service import booking_session_service
+from services.booking_validation_service import find_missing_fields
+
+_BOOKING_FIELDS = (
+    "name",
+    "email",
+    "mobile",
+    "trip_category",
+    "trip_type",
+    "pickup_location",
+    "destination",
+    "city",
+    "pickup_address",
+    "travel_date",
+    "pickup_time",
+    "vehicle_type",
+)
 
 
-class BaseAgent(abc.ABC):
-    name: ClassVar[str]
-    description: ClassVar[str]
+@register_planner
+class BookingPlanner(BasePlanner):
+    name = "booking_planner"
+    description = (
+        "Slot-filling planner for cab bookings. Extracts fields from the "
+        "user's free-text message via booking_extraction_chain, merges "
+        "with any structured fields already on the request and with "
+        "persisted booking state, and either asks for what's missing or "
+        "produces a create_booking plan once complete."
+    )
 
-    def __init__(
-        self,
-        tool_executor: ToolExecutor | None = None,
-        planner: BasePlanner | None = None,
-        plan_executor: PlanExecutor | None = None,
-    ) -> None:
-        self.tool_executor = tool_executor or default_tool_executor
-        self.planner = planner
-        self.plan_executor = plan_executor or default_plan_executor
-
-    def __init_subclass__(cls, **kwargs: Any) -> None:
-        super().__init_subclass__(**kwargs)
-        if abc.ABC in cls.__bases__:
-            return
-        for attr in ("name", "description"):
-            if getattr(cls, attr, None) is None:
-                raise TypeError(f"{cls.__name__} must define class attribute '{attr}'")
-
-    async def run(self, request: dict[str, Any], context: AgentContext) -> AgentResult:
-        start = time.perf_counter()
-
-        try:
-            context = await self.prepare_context(request, context)
-        except Exception as exc:
-            error = (
-                exc
-                if isinstance(exc, PlanningError)
-                else PlanningError(self.name, str(exc))
-            )
-            return self._failure(error, start)
-
-        try:
-            plan = await self.plan(request, context)
-        except Exception as exc:
-            error = (
-                exc
-                if isinstance(exc, PlanningError)
-                else PlanningError(self.name, str(exc))
-            )
-            return self._failure(error, start)
-
-        try:
-            result = await self.execute(plan, context)
-        except Exception as exc:
-            error = (
-                exc
-                if isinstance(exc, ExecutionError)
-                else ExecutionError(self.name, str(exc))
-            )
-            return self._failure(error, start)
-
-        result.agent_name = self.name
-        result.plan = plan.plan if isinstance(plan, PlanningResult) else plan
-        result.execution_time_ms = (time.perf_counter() - start) * 1000
-        return result
-
-    async def prepare_context(
-        self, request: dict[str, Any], context: AgentContext
-    ) -> AgentContext:
-        return context
-
-    async def plan(
-        self, request: dict[str, Any], context: AgentContext
+    async def create_plan(
+        self, request: dict[str, Any], context: PlannerContext
     ) -> PlanningResult:
-        if self.planner is None:
-            raise PlanningError(self.name, "no planner configured for this agent")
-        planner_context = self._build_planner_context(request, context)
-        return await self.planner.create_plan(request, planner_context)
+        user_id = context.user_id or request.get("user_id")
+        session_id = context.session_id or request.get("session_id")
 
-    def _build_planner_context(
-        self, request: dict[str, Any], context: AgentContext
-    ) -> PlannerContext:
-        return PlannerContext(
-            user_id=context.user_id,
-            session_id=context.session_id,
-            intent=context.intent,
-            conversation_history=context.conversation_history,
-            workflow=context.workflow,
-            metadata=context.metadata,
-            available_tools=self.tool_executor.registry.describe_all(),
+        previous_booking = (
+            booking_session_service.get_booking(user_id=user_id, session_id=session_id)
+            or {}
         )
 
-    async def execute(self, plan: Any, context: AgentContext) -> AgentResult:
-        if not isinstance(plan, PlanningResult):
-            raise ExecutionError(
-                self.name,
-                "default execute() requires a PlanningResult - override plan()/execute() "
-                "for agents that plan() with a custom structure",
+        message = request.get("message", "")
+        extracted_from_text: dict[str, Any] = {}
+        if message:
+            extracted_from_text = await asyncio.to_thread(
+                booking_extraction_chain.invoke, {"question": message}
             )
 
-        if plan.status == PlanningStatus.NEED_MORE_INFORMATION:
-            return AgentResult.ok(
-                response=plan.response,
-                metadata={
-                    "completed": False,
-                    "missing_fields": plan.missing_fields,
-                    **plan.metadata,
-                },
-            )
+        structured = {
+            field: request[field] for field in _BOOKING_FIELDS if field in request
+        }
+        new_data = {**extracted_from_text, **structured}
 
-        if plan.plan is None:
-            raise ExecutionError(
-                self.name, "planner returned status=READY but no plan was attached"
-            )
-
-        execution_context = self._build_execution_context(context)
-        execution_result = await self.plan_executor.execute_plan(
-            plan.plan, execution_context
+        merged_booking = booking_session_service.merge_booking(
+            previous_booking, new_data
         )
-        return self._to_agent_result(execution_result)
-
-    def _build_execution_context(self, context: AgentContext) -> ExecutionContext:
-        return ExecutionContext(
-            user_id=context.user_id,
-            session_id=context.session_id,
-            tool_executor=self.tool_executor,
-            trace_id=context.trace_id,
-            metadata=context.metadata,
+        booking_session_service.save_booking(
+            user_id=user_id, session_id=session_id, booking=merged_booking
         )
 
-    def _to_agent_result(self, execution_result: ExecutionResult) -> AgentResult:
-        tool_calls = [step.model_dump() for step in execution_result.step_results]
-        if execution_result.success:
-            return AgentResult.ok(
-                response=f"Completed {len(execution_result.step_results)} step(s).",
-                tool_calls=tool_calls,
-                metadata=execution_result.metadata,
+        missing = find_missing_fields(merged_booking)
+        if missing:
+            return PlanningResult.need_more_information(
+                response=get_next_question(missing),
+                missing_fields=missing,
+                metadata={"booking_details": merged_booking},
             )
-        return AgentResult.fail(
-            error=execution_result.error or "execution failed",
-            tool_calls=tool_calls,
-            metadata={
-                "failed_step": execution_result.failed_step,
-                **execution_result.metadata,
-            },
-        )
 
-    def _failure(self, error: Exception, start: float) -> AgentResult:
-        return AgentResult.fail(
-            error=str(error),
-            agent_name=self.name,
-            execution_time_ms=(time.perf_counter() - start) * 1000,
+        step = PlanStep(
+            tool_name="create_booking",
+            input={field: merged_booking.get(field) for field in _BOOKING_FIELDS},
+            description="Create the confirmed booking",
+        )
+        plan = ExecutionPlan(
+            goal="create booking",
+            steps=[step],
+            metadata={"booking_details": merged_booking, "completed": True},
+        )
+        return PlanningResult.ready(
+            plan=plan, metadata={"booking_details": merged_booking}
         )
