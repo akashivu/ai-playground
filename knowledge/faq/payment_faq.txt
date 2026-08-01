@@ -1,0 +1,38 @@
+===== payment_faq.txt =====
+
+PAYMENT FAQ
+
+This document addresses customer questions related to payments, billing methods, and transaction issues on Elixway. It is intended for use by the AI Customer Support system to provide accurate and consistent answers regarding payment processes.
+
+Question: What payment methods does Elixway support?
+Answer: Elixway supports multiple payment methods, which may include credit cards, debit cards, UPI, net banking, and digital wallets, depending on the region and platform version. Cash payment directly to the driver may be available for select service types, subject to local policy. Available payment options are displayed at the time of checkout.
+
+Question: When is payment charged for a booking?
+Answer: Depending on the service type and selected payment method, payment may be charged at the time of booking confirmation, or a partial advance amount may be collected with the remainder due at the end of the trip. The exact payment structure for a booking is displayed during checkout before confirmation.
+
+Question: Is it safe to make payments through the Elixway app?
+Answer: Yes. All online payments are processed through secure, encrypted payment gateways. Elixway does not store complete card details on its own servers. Payment security measures follow standard industry practices for handling financial transactions.
+
+Question: What should I do if my payment fails but money is deducted?
+Answer: If a payment fails but an amount is deducted from your account, the amount is typically reversed automatically within a standard banking timeframe. If the reversal does not reflect within the expected period, contact Elixway customer support with your booking reference and transaction details for further assistance.
+
+Question: Can I pay in cash?
+Answer: Cash payment availability depends on the service type, city, and driver preference. Where cash payment is supported, this option will be visible during the booking or checkout process. Outstation and rental bookings may require partial or full online payment to confirm the booking.
+
+Question: Will I receive a receipt for my payment?
+Answer: Yes. A digital receipt is generated for every completed transaction and is accessible through the booking history section of the app. For customers requiring a formal GST invoice, refer to the GST invoice policy document for eligibility and request procedures.
+
+Question: Can I use multiple payment methods for one booking?
+Answer: Split payments across multiple methods for a single booking are generally not supported. Each booking is processed through one primary payment method selected at checkout.
+
+Question: What happens if I do not complete payment during booking?
+Answer: If payment is not completed within the checkout session, the booking may not be confirmed, and any vehicle temporarily held for the booking may be released for other customers. You will need to restart the booking process to try again.
+
+Question: Are there additional charges applied automatically?
+Answer: Certain charges, such as toll fees, state permit charges, night charges, or waiting charges, may be applied automatically based on the nature of the trip. These charges are outlined in the relevant policy documents and are calculated by the backend fare system, not manually added.
+
+Question: How do refunds appear after a payment is reversed?
+Answer: Refunds are processed to the original payment method used for the booking. Processing timelines vary depending on the payment provider and bank. Refer to the refund policy document for detailed timelines and conditions.
+
+Question: Who do I contact for billing discrepancies?
+Answer: For any billing discrepancy, including incorrect charges or unclear deductions, contact Elixway customer support with your booking ID. Support agents can review the transaction and fare breakdown to resolve the issue.

@@ -1,0 +1,45 @@
+===== cancellation_confirmation.txt =====
+
+CANCELLATION CONFIRMATION TEMPLATE
+
+This document provides the standard template used to confirm a booking cancellation on Elixway. Placeholders shown in double curly braces are populated dynamically with actual booking data by the backend system at the time of message generation.
+
+TEMPLATE
+
+Subject: Your Elixway booking has been cancelled
+
+Hello {{customer_name}},
+
+This confirms that your booking has been cancelled as requested.
+
+Booking ID: {{booking_id}}
+Pickup Location: {{pickup}}
+Drop Location: {{drop}}
+Scheduled Pickup Time: {{pickup_time}}
+Vehicle: {{vehicle}}
+
+If any cancellation charge applies based on our cancellation policy, this will be reflected in your payment history, along with any applicable refund for the remaining amount.
+
+If you did not request this cancellation, or if you have any questions about this booking, please contact our support team at {{support_number}} or through the Elixway app immediately.
+
+We hope to assist with your travel needs again soon.
+
+Thank you for choosing Elixway.
+
+USAGE NOTES
+
+This template is intended for use immediately after a booking cancellation is processed, whether initiated by the customer, the assigned driver, or the platform due to unavailability. It should be sent through the customer's preferred notification channel, which may include in-app notification, SMS, or email, depending on account settings.
+
+FIELD DEFINITIONS
+
+- {{customer_name}}: The name of the customer associated with the cancelled booking.
+- {{booking_id}}: The unique identifier assigned to the booking, used for all future reference and support inquiries.
+- {{pickup}}: The pickup location that was specified for the cancelled trip.
+- {{drop}}: The drop location that was specified for the cancelled trip, where applicable.
+- {{pickup_time}}: The originally scheduled pickup date and time.
+- {{vehicle}}: The vehicle category that was selected or assigned for the cancelled booking.
+- {{support_number}}: The customer support contact number relevant to the customer's booking or region.
+
+IMPORTANT NOTES FOR AI ASSISTANT USAGE
+
+When referencing this template in conversation, the AI assistant should retrieve actual values for each placeholder from the backend booking system rather than generating placeholder text visible to the customer. Any applicable cancellation charge or refund amount should be sourced from the backend fare and payment systems, as these are not fixed within this document and depend on the specific circumstances of the cancellation, in accordance with the cancellation and refund policy documents.

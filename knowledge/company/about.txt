@@ -1,0 +1,34 @@
+===== about.txt =====
+
+ABOUT ELIXWAY
+
+Elixway is an AI-first travel platform designed to simplify the process of planning, booking, and managing travel through a combination of intelligent trip planning tools and reliable ground transportation services. The platform integrates artificial intelligence directly into the travel booking experience, moving beyond traditional static booking interfaces toward a more conversational and assistive approach to travel.
+
+WHAT ELIXWAY OFFERS
+
+Elixway provides a range of services centered around ground transportation and trip planning, including:
+
+- Airport Transfers, providing reliable point-to-point transportation to and from airports.
+- Outstation Cabs, supporting intercity travel between destinations, available as one-way or round trip bookings.
+- Rental Cabs, offering vehicles with drivers for defined durations, suitable for local sightseeing, business needs, or multi-stop itineraries within a city.
+- AI Trip Planning, which assists customers in structuring travel itineraries and identifying suitable transportation options based on their travel needs.
+- Vehicle Recommendations, helping customers select an appropriate vehicle category based on group size, luggage requirements, and trip type.
+- AI Booking Assistant, guiding customers through the booking process and answering questions related to services, policies, and trip details.
+- Live Booking Workflow, supporting real-time booking confirmation, driver assignment, and trip tracking.
+- AI Customer Support, providing automated and human-assisted support for booking-related questions, policy clarifications, and issue resolution.
+
+THE ROLE OF AI IN ELIXWAY
+
+Artificial intelligence is integrated throughout the Elixway platform to support customers at multiple stages of their journey, from initial trip planning and vehicle selection through to booking confirmation, live trip tracking, and post-trip support. This includes surfacing relevant policy information, providing accurate answers to customer questions, and assisting with routine booking or support tasks, while dynamic elements such as pricing, vehicle availability, and booking status are handled by dedicated backend systems to ensure accuracy.
+
+WHO ELIXWAY SERVES
+
+Elixway serves a broad range of travelers, including individual leisure travelers, families planning vacations, business travelers requiring reliable transportation, and groups organizing outstation trips or local sightseeing itineraries. The platform is designed to accommodate varying group sizes and travel needs through its range of vehicle categories and service types.
+
+COMMITMENT TO RELIABLE SERVICE
+
+Elixway is built around the principle of providing transparent, well-documented policies and clear communication around bookings, pricing structures, and service expectations. Customers can access detailed information regarding cancellations, refunds, luggage handling, and other service aspects to make informed decisions when booking travel.
+
+HOW ELIXWAY WORKS WITH CUSTOMERS
+
+Customers interact with Elixway through its app or website, where they can access AI-assisted trip planning, compare vehicle options, complete bookings, and manage ongoing or past trips. Customer support remains available throughout the customer journey to address questions or resolve issues that may arise before, during, or after a trip.

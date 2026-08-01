@@ -1,0 +1,45 @@
+===== tempo_traveller.txt =====
+
+VEHICLE PROFILE: TEMPO TRAVELLER
+
+This document describes the tempo traveller vehicle category available on Elixway, designed for larger group travel. Exact vehicle models, seating configurations, and live availability are determined by the backend fleet system at the time of booking.
+
+PASSENGER CAPACITY
+
+Tempo travellers typically accommodate larger groups, commonly ranging from twelve to seventeen passengers depending on the specific seating configuration, in addition to the driver. This makes the category suitable for large families, group tours, and corporate outings.
+
+LUGGAGE CAPACITY
+
+Tempo travellers generally offer substantial luggage space, often including a dedicated luggage compartment or carrier area separate from the passenger cabin, making them well suited for group trips involving multiple suitcases and bags per passenger.
+
+COMFORT LEVEL
+
+While designed primarily for group capacity, tempo travellers typically offer forward-facing individual or bench-style seating with reasonable legroom, and many configurations include push-back seats for added comfort on longer journeys. Comfort level is generally considered adequate for both short city travel and multi-hour outstation trips.
+
+RECOMMENDED USAGE
+
+The tempo traveller category is commonly recommended for:
+
+- Large group outstation trips, such as family reunions or group vacations.
+- Corporate outings, offsite events, and employee transportation.
+- Wedding-related group travel and other large social gatherings.
+- School or organizational group trips requiring transport for a significant number of passengers.
+
+SUITABLE TRIP TYPES
+
+Tempo travellers are well suited for outstation group trips, large rental bookings for city tours, and event-based transportation needs where a single vehicle can transport the entire group together, reducing coordination complexity compared to multiple smaller vehicles.
+
+IDEAL TRAVEL SCENARIOS
+
+- A large family group traveling together for a multi-day outstation vacation.
+- A corporate team heading to an offsite location or team event.
+- A wedding party requiring coordinated group transport between venues.
+- An educational or community group traveling together for a day trip or excursion.
+
+LIMITATIONS
+
+Due to their larger size, tempo travellers may have more limited maneuverability in narrow city streets or remote areas with restricted road access compared to smaller vehicle categories. They may also have a higher overall cost compared to booking multiple smaller vehicles, depending on group size and route.
+
+AVAILABILITY
+
+Tempo traveller availability, exact fare, and estimated arrival time are determined dynamically by the backend booking system based on real-time demand, city, and group size requirements, and are displayed to the customer during the booking process.

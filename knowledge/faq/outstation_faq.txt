@@ -1,0 +1,38 @@
+===== outstation_faq.txt =====
+
+OUTSTATION CAB FAQ
+
+This document addresses customer questions related to Elixway outstation cab bookings, which cover intercity travel between two or more cities, either one-way or round trip.
+
+Question: What is an outstation cab booking?
+Answer: An outstation cab booking provides a vehicle and driver for travel between cities, such as from Bangalore to Mysore or Bangalore to Coorg. These trips can be booked as one-way or round trip, depending on customer requirements.
+
+Question: What is the difference between one-way and round trip outstation bookings?
+Answer: A one-way booking covers travel from the origin city to the destination city only, after which the vehicle is released. A round trip booking includes both onward and return travel, typically with the same vehicle and driver, and may involve different fare calculations, including possible charges for the return leg even if the vehicle is not physically used for the return journey, depending on standard industry practice for one-way drop trips.
+
+Question: Is driver allowance included in the outstation fare?
+Answer: Driver allowance is generally charged separately from the base per-kilometer fare for outstation trips, covering the driver's daily expenses during multi-day trips. Refer to the driver allowance policy document for details on when this charge applies.
+
+Question: Are toll charges and state permit fees included in the outstation fare?
+Answer: Toll charges, state entry permits, and interstate taxes are typically charged separately from the base fare, as these vary by route and are determined by government authorities. These are calculated automatically based on the selected route.
+
+Question: Can I make stops along the way during an outstation trip?
+Answer: Yes, reasonable stops for meals, rest, or sightseeing along the route are generally accommodated during outstation trips. Extended detours significantly outside the planned route may involve additional charges based on extra distance covered.
+
+Question: How many days can an outstation trip last?
+Answer: Outstation trips can range from a single day to multiple days, depending on the destination and itinerary planned. Multi-day trips typically involve daily driver allowance charges and may require overnight accommodation arrangements for the driver, which are the customer's responsibility unless otherwise specified.
+
+Question: What is a minimum kilometer requirement?
+Answer: Outstation bookings often have a minimum daily kilometer requirement, meaning fare calculation is based on either actual distance traveled or the minimum kilometer threshold, whichever is higher. This is standard practice across the outstation cab industry and is reflected in the fare shown before booking confirmation.
+
+Question: Can I change my destination after booking an outstation trip?
+Answer: Significant changes to the destination city after confirmation may not be possible for the same booking, as this affects driver allocation, route planning, and fare. In such cases, the existing booking may need to be cancelled and a new booking created, subject to the cancellation policy.
+
+Question: What happens if my outstation trip takes longer than planned?
+Answer: If the trip extends beyond the originally planned duration, additional daily charges and driver allowance for the extra days may apply, calculated based on actual usage and communicated through the app.
+
+Question: Is the same driver available for the entire outstation trip?
+Answer: In most cases, the same driver and vehicle remain assigned for the full duration of a multi-day outstation trip. In rare circumstances involving driver unavailability due to unforeseen issues, Elixway will arrange a suitable replacement to ensure trip continuity.
+
+Question: Can I book an outstation trip for a group with heavy luggage?
+Answer: Yes, for groups with substantial luggage, vehicle categories such as SUV or tempo traveller are recommended. Refer to the relevant vehicle documents for passenger and luggage capacity details before selecting a vehicle type.

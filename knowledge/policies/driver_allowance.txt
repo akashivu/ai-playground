@@ -1,0 +1,39 @@
+===== driver_allowance.txt =====
+
+DRIVER ALLOWANCE POLICY
+
+This document explains the driver allowance charge applicable to certain trip types booked through Elixway, primarily Outstation Cabs and multi-day Rental Cab bookings.
+
+WHAT IS DRIVER ALLOWANCE
+
+Driver allowance is a charge intended to cover the driver's daily expenses, such as meals and incidental costs, when a trip requires the driver to travel away from their base city or work extended hours beyond a standard local trip. This charge is separate from the base per-kilometer fare and is applied in addition to it.
+
+WHEN DRIVER ALLOWANCE APPLIES
+
+Driver allowance is typically applicable in the following scenarios:
+
+- Outstation trips where the driver travels to a different city and may need to stay overnight before returning.
+- Multi-day rental bookings where the vehicle and driver are engaged for consecutive days.
+- Trips extending significantly beyond standard local working hours, even within the same city, depending on platform policy.
+
+Driver allowance generally does not apply to standard single-day airport transfers or short local rental packages within normal working hours.
+
+HOW DRIVER ALLOWANCE IS CALCULATED
+
+Driver allowance is typically charged as a fixed daily amount per day of the trip, applied for each day the driver remains engaged with the customer's trip, including any overnight halts. For round-trip outstation bookings, driver allowance may apply for the full round-trip duration, including days spent at the destination before the return journey. The exact daily allowance amount is determined by the backend pricing system based on city and vehicle category, and is displayed to the customer before booking confirmation.
+
+MULTI-DAY TRIPS
+
+For trips lasting multiple days, driver allowance accrues for each day of the trip, including days where the vehicle may be idle at the destination while the customer completes their activities, since the driver remains engaged and unavailable for other assignments during this period.
+
+DRIVER ACCOMMODATION
+
+For overnight outstation trips, arranging reasonable accommodation for the driver is generally the customer's responsibility, though in many cases this is addressed through the driver allowance itself, which is intended to cover such incidental costs. Customers are encouraged to clarify accommodation arrangements with the driver at the start of a multi-day trip.
+
+TRANSPARENCY IN PRICING
+
+Driver allowance is displayed as a distinct line item in the fare breakdown before booking confirmation and again in the final trip invoice, allowing customers to clearly see this charge separate from the base fare, toll charges, and other applicable fees.
+
+DISPUTES REGARDING DRIVER ALLOWANCE
+
+If a customer believes driver allowance was incorrectly applied or calculated for their trip, they should contact Elixway customer support with their booking ID for a review of the fare breakdown and applicable trip details.

@@ -1,0 +1,38 @@
+===== airport_transfer_faq.txt =====
+
+AIRPORT TRANSFER FAQ
+
+This document addresses common customer questions specific to airport transfer bookings on Elixway, covering pickup procedures, flight tracking, and drop-off arrangements.
+
+Question: How does airport pickup work?
+Answer: For airport pickup, the assigned driver will wait at the designated pickup point, typically in the arrivals area or a nearby designated pickup zone as per airport regulations. Driver contact details are shared before the flight lands, allowing you to coordinate the exact meeting point.
+
+Question: Does Elixway track my flight for pickup timing?
+Answer: Where supported, Elixway integrates with flight tracking data to monitor actual arrival times, including delays. This helps ensure the driver arrives at an appropriate time rather than strictly following the originally scheduled arrival time. Customers should still keep the driver contact number handy in case direct coordination is needed.
+
+Question: What if I cannot find my driver at the airport?
+Answer: If you are unable to locate your driver, contact them directly using the phone number provided in your booking confirmation. If contact cannot be established, reach out to Elixway customer support immediately for assistance in locating your driver or arranging an alternative.
+
+Question: Is airport drop-off different from airport pickup?
+Answer: Airport drop-off follows a similar booking process but does not require flight tracking coordination, since the trip begins from your specified pickup location and ends at the airport terminal. It is recommended to schedule the pickup time with sufficient buffer before your flight's boarding time.
+
+Question: How early should I book an airport transfer before my flight?
+Answer: For departures, booking a pickup time that allows for airport check-in, security, and potential traffic delays is recommended. For arrivals, the transfer should be booked to align with your flight's scheduled or updated landing time, factoring in time for baggage claim and exiting the terminal.
+
+Question: Can I request a specific vehicle type for airport transfer?
+Answer: Yes. Vehicle categories such as sedan, SUV, or luxury can be selected during booking based on passenger count and luggage requirements. Refer to individual vehicle documents for capacity details to select the most suitable option.
+
+Question: What happens if my flight is cancelled?
+Answer: If your flight is cancelled, contact Elixway customer support as soon as possible to cancel or reschedule your airport transfer booking. Cancellation charges, if applicable, are governed by the standard cancellation policy, though flight cancellations may be treated as an exception depending on circumstances and supporting documentation.
+
+Question: Are toll charges included in airport transfer fares?
+Answer: Toll charges, airport entry fees, and parking charges at the airport premises are typically charged separately from the base fare, as these vary based on the specific airport and route. These charges are calculated automatically by the backend fare system, not manually added.
+
+Question: Can I add extra stops during an airport transfer?
+Answer: Airport transfers are generally designed as direct point-to-point trips. Additional stops may not be supported for standard airport transfer bookings. For trips involving multiple stops, an outstation or rental booking may be more suitable.
+
+Question: What identification do I need to carry for airport transfers?
+Answer: Airport transfers do not require the passenger to carry specific Elixway identification, but passengers should carry valid personal identification and travel documents as required by the airport and their airline.
+
+Question: How do I know which terminal my driver will meet me at?
+Answer: Terminal and pickup point details are communicated in advance based on the airport information you provide or the flight details linked to your booking. If your airport has multiple terminals, confirm the correct terminal with your driver directly upon flight landing.
