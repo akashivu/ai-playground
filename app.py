@@ -41,8 +41,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "https://adiyogicabz.com",
-        "https://www.adiyogicabz.com",
+        "https://elixway.com",
+        "https://www.elixway.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],

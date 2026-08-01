@@ -12,7 +12,7 @@ def format_recommendations(vehicles: list[dict]) -> str:
         return (
             f"We currently don't have a vehicle for your group size. "
             f"Our largest vehicle accommodates {MAX_CAPACITY} passengers. "
-            "Please contact AdiyogiCabz for custom arrangements."
+            "Please contact Elixway for custom arrangements."
         )
 
     lines = ["Here are the recommended vehicles for your trip:\n"]

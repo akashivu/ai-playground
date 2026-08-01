@@ -1,0 +1,33 @@
+===== service_areas.txt =====
+
+SERVICE AREAS OVERVIEW
+
+This document describes the general approach Elixway takes to service area coverage across its offerings. Specific city-by-city availability for each service type is maintained and updated within the backend system, as coverage may expand or change over time and is not fixed within this knowledge document.
+
+SERVICE AVAILABILITY BY TYPE
+
+Elixway's core services, including Airport Transfers, Outstation Cabs, and Rental Cabs, are generally available across a range of cities, with coverage depth varying by service type. Airport Transfers are typically available in cities with active commercial airports, while Rental Cabs are generally available in cities with sufficient local demand and driver availability. Outstation Cabs connect eligible origin cities to a range of destination cities, depending on route demand and regional coverage.
+
+CHECKING SERVICE AVAILABILITY
+
+The most accurate and current information on whether a specific service is available in a given city or for a specific route is determined by entering the relevant pickup and drop details into the Elixway app or website, which checks live availability through the backend system. This ensures customers receive accurate, up-to-date information rather than relying on static assumptions about coverage.
+
+EXPANDING COVERAGE
+
+Elixway's service coverage is subject to change as the platform grows and adapts to demand across different regions. Cities or routes not currently supported may become available in the future, and customers can check back periodically or contact customer support to inquire about specific route availability.
+
+REGIONAL FOCUS
+
+Elixway's initial and ongoing focus includes major cities and popular travel corridors, particularly those connecting metropolitan hubs to nearby tourist and business destinations. This includes established routes between major cities and popular hill station or heritage destinations frequently sought by travelers for outstation trips.
+
+RURAL AND REMOTE AREA CONSIDERATIONS
+
+For pickup or drop locations in more remote or rural areas, service availability may be more limited compared to central urban areas, and additional coordination with customer support may be helpful to confirm feasibility and any special arrangements needed for such trips.
+
+CUSTOMER SUPPORT FOR SERVICE AREA QUERIES
+
+Customers uncertain about whether Elixway operates in a specific city or along a specific route are encouraged to check availability directly through the app for the most accurate result, or to contact customer support for further clarification, particularly for less common or emerging routes.
+
+FUTURE SERVICE ANNOUNCEMENTS
+
+Updates regarding new service areas, expanded route coverage, or newly supported cities are communicated through the Elixway app and official communication channels as they become available.

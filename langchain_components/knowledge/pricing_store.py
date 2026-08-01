@@ -1,7 +1,7 @@
 PRICING = {
     "airport_pickup": (
         "Airport pickup and drop pricing depends on vehicle type and pickup location. "
-        "Please contact AdiyogiCabz for the latest fare."
+        "Please contact Elixway for the latest fare."
     ),
     "one_way_trip": "One-way trip pricing depends on destination, distance, and vehicle selection.",
     "round_trip": "Round-trip pricing depends on total kilometers, days, and vehicle type.",

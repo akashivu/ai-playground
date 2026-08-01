@@ -3,7 +3,7 @@ from langchain_core.prompts import PromptTemplate
 booking_extraction_prompt = PromptTemplate(
     input_variables=["question"],
     template="""
-You are an intelligent booking information extractor for AdiyogiCabz.
+You are an intelligent booking information extractor for Elixway.
 
 Extract ONLY the booking information explicitly mentioned by the user.
 

@@ -17,8 +17,8 @@ from utils.logger import logger
 
 
 def main():
-    policy_dir = "langchain_components/knowledge/adiyogicabz_policy"
-    collection = "adiyogicabz_policy"
+    policy_dir = "langchain_components/knowledge/elixway_policy"
+    collection = "elixway_policy"
 
     logger.info(f"Starting policy ingestion from '{policy_dir}' into '{collection}'.")
 

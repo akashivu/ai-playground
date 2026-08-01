@@ -12,16 +12,10 @@ from models.booking_api_models import (
 
 
 class SpringBookingClient:
-    """
-    Client responsible for communicating with the
-    AdiyogiCabz Spring Boot backend.
-
-    This is the ONLY place that knows about the
-    Spring Boot DTO field names.
-    """
+   
 
     def __init__(self) -> None:
-        self.base_url = os.getenv("ADIYOGICABZ_API_URL", "")
+        self.base_url = os.getenv("ELIXWAY_API_URL", "")
         self.timeout = 10.0
 
     def _is_configured(self) -> bool:

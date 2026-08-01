@@ -9,8 +9,8 @@ from core.dependencies import vector_store
 
 def main():
 
-    faq_dir = "knowledge/adiyogicabz_faq"
-    collection = "adiyogicabz_faq"
+    faq_dir = "knowledge/elixway_faq"
+    collection = "elixway_faq"
     logger.info(f"Starting FAQ ingestion from " f"'{faq_dir}' into '{collection}'.")
     result = (knowledge_ingestion_service.ingest_directory(directory=faq_dir,collection=collection,))
     vector_store.save_index( "data/faiss_index.bin")

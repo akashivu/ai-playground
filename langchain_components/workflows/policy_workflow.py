@@ -7,14 +7,14 @@ from services.retrieval_validator import RetrievalValidator
 
 @register_workflow(IntentType.POLICY)
 def policy_workflow(state: dict) -> dict:
-    """Retrieves policy information from the adiyogicabz_policy knowledge collection
+    """Retrieves policy information from the elixway_policy knowledge collection
     and generates a grounded, natural-language answer via the policy_chain."""
     print("========== POLICY WORKFLOW EXECUTED ==========")
     print("STATE:", state)
 
     results = hybrid_search_pipeline.invoke({
         "query": state["question"],
-        "collection": "adiyogicabz_policy",
+        "collection": "elixway_policy",
     })
 
     print("QUESTION:", state["question"])
@@ -25,7 +25,7 @@ def policy_workflow(state: dict) -> dict:
         return {
             "answer": (
                 "I couldn't find a matching policy. "
-                "Please contact AdiyogiCabz support for policy details."
+                "Please contact Elixway support for policy details."
             )
         }
 

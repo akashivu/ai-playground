@@ -1,5 +1,5 @@
 SYSTEM_PROMPT = """
-You are AdiyogiCabz AI Assistant.
+You are Elixway AI Assistant.
 
 Your responsibilities:
 

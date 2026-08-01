@@ -47,15 +47,19 @@ class KnowledgeIngestionService:
                 continue
 
             embeddings.append(embedding)
-            metadata.append({
-                "text": chunk,
-                "source": os.path.basename(file_path),
-                "document_id": f"{document_id}_{index}",
-                "collection": collection,
-                "document_type": extension.replace(".", ""),
-                "chunk_index": index,
-                "ingested_at": datetime.utcnow().isoformat(),
-            })
+            metadata.append(
+                {
+                    "text": chunk,
+                    "source": os.path.relpath(file_path),
+                    "category": os.path.basename(os.path.dirname(file_path)),
+                    "filename": os.path.basename(file_path),
+                    "document_id": f"{document_id}_{index}",
+                    "collection": collection,
+                    "document_type": extension.lstrip("."),
+                    "chunk_index": index,
+                    "ingested_at": datetime.utcnow().isoformat(),
+                }
+            )
 
         if not embeddings:
             return {"status": "error", "document_id": document_id, "collection": collection, "chunks": 0}
@@ -77,22 +81,36 @@ class KnowledgeIngestionService:
         total_chunks = 0
         total_documents = 0
 
-        for filename in os.listdir(directory):
-            extension = os.path.splitext(filename)[1].lower()
-            if extension not in SUPPORTED_EXTENSIONS:
-                continue
-            file_path = os.path.join(directory, filename)
-            try:
-                result = self.ingest_document(file_path=file_path, collection=collection, persist=False)
-                if result["chunks"] > 0:
-                    total_documents += 1
-                    total_chunks += result["chunks"]
-            except Exception as e:
-                logger.error(f"Failed to ingest {filename}: {e}")
+        for root, _, files in os.walk(directory):
+            for filename in files:
+                extension = os.path.splitext(filename)[1].lower()
+
+                if extension not in SUPPORTED_EXTENSIONS:
+                    continue
+
+                file_path = os.path.join(root, filename)
+
+                try:
+                    result = self.ingest_document(
+                        file_path=file_path,
+                        collection=collection,
+                        persist=False,
+                    )
+
+                    if result["chunks"] > 0:
+                        total_documents += 1
+                        total_chunks += result["chunks"]
+
+                except Exception as exc:
+                    logger.error(f"Failed to ingest '{file_path}': {exc}")
 
         if persist and total_chunks > 0:
             self.vector_store.save_index(FAISS_INDEX_PATH)
             self.vector_store.save_metadata(METADATA_PATH)
+
+            self.bm25_service.build_index(
+                self.vector_store.metadata
+            )
 
         logger.info(f"Directory ingestion complete. Documents={total_documents}, Chunks={total_chunks}")
         return {"status": "success", "collection": collection, "documents": total_documents, "chunks": total_chunks}

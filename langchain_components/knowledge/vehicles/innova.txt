@@ -1,0 +1,45 @@
+===== innova.txt =====
+
+VEHICLE PROFILE: INNOVA (MPV CATEGORY)
+
+This document describes the Innova-class multi-purpose vehicle (MPV) category available on Elixway, including capacity, suitability, and typical use cases. Exact vehicle models and live availability are determined by the backend fleet system at the time of booking.
+
+PASSENGER CAPACITY
+
+Innova-class vehicles typically accommodate up to six or seven passengers comfortably, in addition to the driver, depending on the seating configuration. This category is widely recognized for offering a balance between passenger capacity and ride comfort for group travel.
+
+LUGGAGE CAPACITY
+
+Innova-class vehicles generally offer solid boot space, though when the vehicle is filled to full passenger capacity, available luggage space may be reduced. For trips with both a full passenger load and substantial luggage, customers may need to consider a rooftop carrier arrangement where supported, or a larger vehicle category such as a tempo traveller.
+
+COMFORT LEVEL
+
+This category is well known for offering a comfortable, stable ride suitable for long-distance travel, with adequate legroom across multiple rows of seating. It is a commonly preferred choice for extended outstation journeys due to its balance of comfort and practicality.
+
+RECOMMENDED USAGE
+
+The Innova category is commonly recommended for:
+
+- Family outstation trips involving six or more passengers.
+- Long-distance travel where ride comfort over extended hours is a priority.
+- Group airport transfers where a family or group travels together with moderate luggage.
+- Rental bookings for group sightseeing within a city.
+
+SUITABLE TRIP TYPES
+
+Innova-class vehicles are well suited for multi-day outstation trips, family vacations, and group travel requiring more capacity than a sedan or standard SUV while remaining more compact and maneuverable than a tempo traveller.
+
+IDEAL TRAVEL SCENARIOS
+
+- An extended family group of six to seven traveling together for a multi-day outstation trip.
+- Long highway journeys where passenger comfort over several hours is a key consideration.
+- Group airport transfers for families arriving or departing together with moderate luggage.
+- City rental bookings for group outings such as weddings, functions, or group sightseeing tours.
+
+LIMITATIONS
+
+When traveling at full passenger capacity, luggage space may be limited. Groups anticipating both a full passenger load and heavy luggage should consider a tempo traveller instead, which offers significantly more combined capacity.
+
+AVAILABILITY
+
+Innova-class vehicle availability, exact fare, and estimated arrival time are determined dynamically by the backend booking system based on real-time demand and location, and are displayed to the customer during the booking process.

@@ -1,6 +1,6 @@
 from langchain_components.routing.intent_types import IntentType
 
-DOMAIN_NAME = "AdiyogiCabz"
+DOMAIN_NAME = "Elixway"
 
 ENABLED_INTENTS = [
     IntentType.GENERAL,

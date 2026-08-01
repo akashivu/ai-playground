@@ -1,0 +1,35 @@
+===== booking_status_faq.txt =====
+
+BOOKING STATUS FAQ
+
+This document addresses customer questions related to tracking and understanding the status of an existing booking on Elixway. Real-time status values are retrieved from the backend booking system and are not fixed within this document.
+
+Question: How can I check the status of my booking?
+Answer: Booking status can be checked in the My Bookings or Booking History section of the Elixway app, where current status such as confirmed, driver assigned, trip started, or completed is displayed based on live data from the backend system.
+
+Question: What do the different booking statuses mean?
+Answer: A booking generally moves through stages including pending confirmation, confirmed, driver assigned, trip in progress, and completed. Bookings may also show a cancelled status if the trip was cancelled by the customer, driver, or platform. The exact status labels and their sequence are managed by the backend system.
+
+Question: My booking shows as pending. What does this mean?
+Answer: A pending status typically indicates that the booking request has been received but is still awaiting confirmation, which may involve vehicle allocation or payment verification. Most pending bookings resolve to confirmed within a short time. If a booking remains pending for an extended period, contact customer support.
+
+Question: How do I track my driver in real time?
+Answer: Once a driver is assigned and the trip begins, live location tracking is typically available through the app, showing the vehicle's current position and estimated arrival time. This feature depends on the driver's device connectivity and location sharing.
+
+Question: What should I do if my booking status has not updated?
+Answer: If a booking status appears outdated or inconsistent with your actual trip experience, refresh the app or check your internet connection first. If the issue persists, contact customer support with your booking ID so the status can be manually verified and corrected if necessary.
+
+Question: Can I share my trip status with someone else?
+Answer: Many trip tracking features allow sharing a live tracking link with friends or family for safety purposes. This option, where available, is typically found within the active trip screen in the app.
+
+Question: What happens if my booking status shows cancelled but I did not cancel it?
+Answer: If a booking shows as cancelled without your action, this may result from driver unavailability, payment failure, or another system-triggered event. Contact customer support immediately with your booking ID to understand the reason and explore rebooking or compensation options where applicable.
+
+Question: How do I get a confirmation message for my booking?
+Answer: A booking confirmation is sent automatically through the app, SMS, or email, depending on your notification preferences, once the booking is successfully confirmed. This includes your booking ID and key trip details.
+
+Question: Can I check past booking details?
+Answer: Yes, completed and past bookings remain accessible in the Booking History section, including trip details, fare breakdown, and payment status, for record-keeping and future reference.
+
+Question: What should I do if I cannot find my booking ID?
+Answer: Your booking ID is included in the confirmation message sent at the time of booking and is also visible in the Booking History section of the app. If you are unable to locate it, contact customer support with your registered phone number for assistance.

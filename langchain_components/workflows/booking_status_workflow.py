@@ -19,7 +19,7 @@ def booking_status_workflow(state: dict) -> dict:
         return {"answer": f"No booking found with ID '{booking_id}'. Please check and try again."}
 
     if status["status"] in ("ERROR", "UNKNOWN"):
-        return {"answer": f"Unable to fetch status for booking '{booking_id}'. Please contact AdiyogiCabz support."}
+        return {"answer": f"Unable to fetch status for booking '{booking_id}'. Please contact Elixway support."}
 
     answer_lines = [
         f"Booking ID: {status['booking_id']}",

@@ -3,7 +3,7 @@ from domains.registry import DOMAINS
 from langchain_components.guardrails.domain_policy import DomainPolicy
 
 
-ACTIVE_DOMAIN = os.getenv("ACTIVE_DOMAIN", "adiyogicabz")
+ACTIVE_DOMAIN = os.getenv("ACTIVE_DOMAIN", "elixway")
 
 
 def get_active_domain() -> dict:

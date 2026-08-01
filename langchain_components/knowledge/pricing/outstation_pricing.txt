@@ -1,0 +1,45 @@
+===== outstation_pricing.txt =====
+
+OUTSTATION PRICING STRUCTURE
+
+This document explains how outstation cab fares are structured on Elixway. It is intended to help the AI assistant explain pricing concepts to customers. It does not contain live fare figures, as actual pricing is generated dynamically by the backend fare calculation system based on real-time and route-specific factors.
+
+FARE COMPONENTS
+
+An outstation fare is generally composed of the following components:
+
+- Base per-kilometer fare, calculated according to the selected vehicle category and the total distance of the route.
+- Minimum daily kilometer requirement, where fare is calculated based on either actual distance covered or a minimum threshold per day, whichever is higher, consistent with standard outstation cab industry practice.
+- Driver allowance, charged per day of the trip as described in the driver allowance policy.
+- Toll charges, state entry permits, and interstate taxes applicable to the specific route.
+- Night charges, if the trip begins or ends within designated night hours.
+
+ONE-WAY VERSUS ROUND TRIP PRICING
+
+One-way outstation trips are generally priced based on the actual distance traveled to the destination city, sometimes factoring in an equivalent return distance in the fare calculation, consistent with common industry practice for one-way drop bookings. Round trip bookings are priced based on the total distance covered across both onward and return journeys, along with driver allowance for each day the vehicle remains engaged, including days spent at the destination.
+
+FACTORS INFLUENCING FARE
+
+Key factors influencing the final outstation fare include:
+
+- Total distance between origin and destination cities.
+- Number of days the trip spans, particularly for multi-day itineraries.
+- Vehicle category selected.
+- Specific route characteristics, including applicable tolls and interstate permits.
+- Time of pickup, particularly regarding night charges.
+
+MULTI-DAY TRIP PRICING
+
+For multi-day outstation trips, fare calculation accounts for total distance covered across all days combined with daily driver allowance charges for each day the trip spans, including days where the vehicle may be stationed at the destination while the customer completes their planned activities.
+
+ESTIMATED FARE DISPLAY
+
+Before confirming an outstation booking, customers are shown an estimated fare based on the entered route, vehicle category, trip duration, and scheduled pickup time. This estimate is generated dynamically by the backend pricing engine and may be adjusted if actual trip parameters, such as distance traveled or number of days, differ from the original plan.
+
+FINAL FARE VARIATIONS
+
+The final outstation fare may vary from the initial estimate if actual distance traveled exceeds the estimated route, if the trip extends beyond the originally planned number of days, or if additional stops significantly increase total distance. Any such variation is reflected transparently in the final trip invoice.
+
+CUSTOMER SUPPORT
+
+For questions about how a specific outstation fare was calculated, or to raise a concern about the final invoiced amount, customers should contact Elixway customer support with their booking ID for a detailed fare breakdown review.

@@ -1,5 +1,5 @@
 Payment Options
 
-AdiyogiCabz supports online payments, bank transfers, and cash payments where applicable.
+Elixway supports online payments, bank transfers, and cash payments where applicable.
 
 Payment availability may vary depending on booking type.

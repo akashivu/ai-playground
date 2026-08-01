@@ -3,7 +3,7 @@ from langchain_core.prompts import ChatPromptTemplate
 POLICY_PROMPT = ChatPromptTemplate.from_messages([
     (
         "system",
-        """You are the official AI assistant for AdiyogiCabz.
+        """You are the official AI assistant for Elixway.
 
 Use ONLY the provided policy context.
 

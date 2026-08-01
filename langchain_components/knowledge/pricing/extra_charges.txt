@@ -1,0 +1,49 @@
+===== extra_charges.txt =====
+
+EXTRA CHARGES OVERVIEW
+
+This document provides a consolidated overview of additional charges that may apply across Elixway bookings, beyond the base fare. It is intended to help the AI assistant explain the general categories of extra charges to customers. Exact amounts for any of these charges are calculated dynamically by the backend fare system and are not fixed within this document.
+
+TOLL CHARGES
+
+Toll charges apply when a trip route passes through toll roads, bridges, or expressways. These charges are determined by the toll authority for the specific route and are passed on to the customer as an actual cost, added separately from the base fare.
+
+STATE PERMIT AND INTERSTATE TAX
+
+For outstation trips crossing state boundaries, applicable state entry permits or interstate taxes may apply, as mandated by regional transport regulations. These charges vary by route and state and are calculated automatically based on the specific journey.
+
+PARKING CHARGES
+
+Parking charges may apply if the vehicle incurs parking fees during the trip, such as at airports, malls, or other paid parking facilities, particularly if extended parking is required while waiting for the customer.
+
+NIGHT CHARGES
+
+Night charges apply to trips beginning, ending, or substantially occurring during designated night hours, as outlined in the night charges policy document. This charge reflects the additional operational cost of night-time services.
+
+WAITING CHARGES
+
+Waiting charges apply once a trip's included free waiting time allowance is exceeded, as outlined in the waiting charges policy document. This is common in scenarios involving delayed passenger readiness or extended stops.
+
+DRIVER ALLOWANCE
+
+Driver allowance applies primarily to outstation and multi-day rental trips, covering the driver's daily expenses when engaged away from their base city or for extended durations, as outlined in the driver allowance policy document.
+
+EXTRA KILOMETER AND EXTRA HOUR CHARGES
+
+For rental cab bookings, charges apply if actual usage exceeds the included kilometers or hours in the selected package, as outlined in the rental pricing document.
+
+CANCELLATION CHARGES
+
+Cancellation charges may apply depending on how close to the scheduled pickup time a booking is cancelled, as outlined in the cancellation policy document.
+
+CHILD SEAT AND OTHER ADD-ON CHARGES
+
+Optional add-ons such as child seats may involve a nominal additional charge, as outlined in the child seat policy document, reflecting the cost of providing the additional equipment.
+
+TRANSPARENCY IN BILLING
+
+All applicable extra charges are itemized separately in the fare estimate shown before booking confirmation, where determinable in advance, and in the final trip invoice, allowing customers to clearly understand each component contributing to their total fare.
+
+CUSTOMER SUPPORT
+
+For questions about specific extra charges applied to a booking, or to dispute an unexpected charge, customers should contact Elixway customer support with their booking ID for a detailed review of the fare breakdown.

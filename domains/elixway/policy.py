@@ -1,7 +1,7 @@
 from langchain_components.guardrails.domain_policy import DomainPolicy
 
-ADIYOGICABZ_POLICY = DomainPolicy(
-    domain_name="adiyogicabz",
+ELIXWAY_POLICY = DomainPolicy(
+    domain_name="elixway",
     allowed_topics=[
         "travel", "tourism", "transportation",
         "vehicle_booking", "trip_planning", "pricing", "destinations",
@@ -10,7 +10,7 @@ ADIYOGICABZ_POLICY = DomainPolicy(
         "code_generation", "essay_writing", "resume_creation", "general_tutoring",
     ],
     refusal_message=(
-        "I'm AdiyogiCabz AI Assistant and can only help with travel "
+        "I'm Elixway AI Assistant and can only help with travel "
         "packages, bookings, pricing, and destinations. How can I help with your trip?"
     ),
 )

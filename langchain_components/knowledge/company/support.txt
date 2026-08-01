@@ -1,0 +1,39 @@
+===== support.txt =====
+
+CUSTOMER SUPPORT OVERVIEW
+
+This document describes how Elixway's customer support system is structured and how customers can expect issues to be handled, from initial contact through resolution.
+
+SUPPORT STRUCTURE
+
+Elixway customer support operates through a combination of AI-assisted support and human support agents. Routine inquiries, such as booking status checks, policy explanations, and general questions, are typically handled through the AI Customer Support system, which draws on platform documentation and integrates with backend booking data to provide accurate responses. More complex or sensitive issues, including disputes, refund escalations, and safety concerns, are routed to human support agents for review.
+
+TYPICAL SUPPORT FLOW
+
+When a customer raises an issue or question, the support flow generally follows these steps:
+
+- The customer initiates contact through the app, website, phone, or email, describing their issue or question.
+- The AI Customer Support system attempts to identify the nature of the inquiry and provide a relevant, accurate response based on platform knowledge and, where applicable, live booking data.
+- If the inquiry involves a specific booking, the system references the relevant booking ID to provide context-specific information, such as current status, applied charges, or driver details.
+- For issues requiring further investigation or human judgment, such as refund approvals or dispute resolution, the inquiry is escalated to a human support agent.
+- The customer is informed of the outcome or next steps, including any required actions on their part.
+
+ESCALATION PROCESS
+
+If a customer is not satisfied with an initial response, or if an issue requires more detailed review, they can request escalation to a human support agent. Escalated cases are typically reviewed with access to full booking and payment history to ensure an informed resolution.
+
+SAFETY AND EMERGENCY SITUATIONS
+
+For safety concerns or emergencies occurring during a trip, customers are encouraged to use the most immediate available contact method, such as the in-app emergency option where available or the customer support phone line, to ensure prompt attention.
+
+SUPPORT FOR DIFFERENT SERVICE TYPES
+
+Support processes generally apply consistently across Airport Transfers, Outstation Cabs, and Rental Cabs, though certain issues may involve service-specific considerations, such as flight delay coordination for airport transfers or multi-day itinerary changes for outstation trips.
+
+DOCUMENTATION AND RECORD KEEPING
+
+All support interactions related to a specific booking are generally logged against that booking's record, allowing customers and support agents to reference prior communication if a follow-up inquiry is needed.
+
+CONTINUOUS IMPROVEMENT
+
+Feedback gathered through customer support interactions is used to identify recurring issues or areas where policies, documentation, or platform functionality may need clarification or improvement, contributing to an ongoing refinement of the overall customer experience.

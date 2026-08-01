@@ -125,10 +125,7 @@ class ConversationManager:
             }
 
         if control == ConversationControl.PAUSE:
-            # Stage 2 (not yet supported): pausing requires a persisted booking
-            # status (ACTIVE/PAUSED/COMPLETED/CANCELLED) so a later turn knows
-            # the booking was paused rather than mid-flow. Until that exists,
-            # treat as a no-op and fall through to the booking workflow like NONE.
+            
             logger.warning(
                 "ConversationControl.PAUSE returned but not yet supported "
                 "(Stage 2 pending) — falling through to booking workflow. "
@@ -144,13 +141,7 @@ class ConversationManager:
         if control == ConversationControl.INTERRUPT:
             faq_result = route_question(state.model_dump())
 
-            # Guard against recursion: if the generic router re-classifies this
-            # as BOOKING, do NOT act on it here — that would route an interrupt
-            # back into booking logic. Fall back to a safe generic response and
-            # keep the booking active for the next turn instead.
-            # TODO: replace `route_question` here with a router restricted to
-            # non-booking intents (e.g. POLICY/FAQ/KNOWLEDGE_SEARCH only) once
-            # that's available in intent_router.py, to remove this guard entirely.
+            
             if faq_result.get("intent") == IntentType.BOOKING:
                 logger.warning(
                     "INTERRUPT routing recursed back into BOOKING intent — "
@@ -174,13 +165,11 @@ class ConversationManager:
                     f"{faq_answer}\n\n"
                     "We were in the middle of your booking. Would you like to continue?"
                 ),
-                # booking_details untouched -> booking stays active for next turn
+                
                 "completed": False,
             }
 
-        # RESUME or NONE: treat the message as a direct answer to the booking
-        # workflow's current question (RESUME is just an explicit confirmation
-        # to keep going; NONE means no control signal was detected at all).
+        
         return execute_workflow(
             intent=IntentType.BOOKING,
             state=state.model_dump(),

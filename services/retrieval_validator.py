@@ -27,4 +27,4 @@ class RetrievalValidator:
 
 def fallback_response() -> str:
     """Returns the safe fallback message when retrieval validation fails."""
-    return "I couldn't find information about that in the AdiyogiCabz knowledge base."
+    return "I couldn't find information about that in the Elixway knowledge base."

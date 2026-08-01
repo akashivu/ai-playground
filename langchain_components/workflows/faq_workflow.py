@@ -14,13 +14,13 @@ def faq_workflow(state: dict) -> dict:
     results = hybrid_search_pipeline.invoke(
         {
             "query": state["question"],
-            "collection": "adiyogicabz_faq",
+            "collection": "elixway_faq",
         })
 
     validation = (RetrievalValidator.validate(results))
 
     if not validation.is_valid:
-        return { "answer": ( "I couldn't find a matching FAQ. " "Please contact AdiyogiCabz support.")}
+        return { "answer": ( "I couldn't find a matching FAQ. " "Please contact Elixway support.")}
     answer = "\n\n".join( item["chunk"] for item in results[:3])
 
     return { "answer": answer,}

@@ -21,7 +21,7 @@ class BookingResponseFormatter:
             lines.append(f"• Vehicle: {response.vehicle_name}")
         if response.fare:
             lines.append(f"• Fare: ₹{response.fare:.0f}")
-        lines.append("\nA confirmation email has been sent. Thank you for choosing AdiyogiCabz!")
+        lines.append("\nA confirmation email has been sent. Thank you for choosing Elixway!")
         return "\n".join(lines)
 
     def pending(self, confirmation: BookingConfirmation) -> str:

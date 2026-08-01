@@ -8,7 +8,7 @@ FAQS = {
         ],
         "answer": (
             "Bookings may be cancelled according to "
-            "AdiyogiCabz cancellation terms and conditions."
+            "Elixway cancellation terms and conditions."
         ),
     },
 

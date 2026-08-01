@@ -1,0 +1,42 @@
+===== cancellation_policy.txt =====
+
+CANCELLATION POLICY
+
+This document defines the terms under which customers may cancel a booking made through Elixway, and the conditions under which cancellation charges may apply. This policy applies across Airport Transfers, Outstation Cabs, and Rental Cabs unless otherwise specified.
+
+SCOPE
+
+This policy governs cancellations initiated by the customer through the Elixway app, website, or customer support. It does not cover cancellations initiated by Elixway or the assigned driver, which are addressed separately under exceptions below.
+
+CANCELLATION WINDOW
+
+Bookings can generally be cancelled at any time before the trip begins. However, cancellation charges may apply depending on how close to the scheduled pickup time the cancellation occurs. As a general structure:
+
+- Cancellations made well in advance of the scheduled pickup time typically incur no charge or a minimal charge.
+- Cancellations made shortly before the scheduled pickup time may incur a higher cancellation charge, as a driver may have already been assigned and dispatched toward the pickup location.
+- Cancellations made after a driver has arrived at the pickup location, or after the trip has started, are treated differently and may be subject to the full or partial trip fare.
+
+Exact cancellation charge amounts and time thresholds are calculated dynamically by the backend booking system based on service type, driver assignment status, and city-specific factors, and are displayed to the customer at the time of cancellation.
+
+HOW TO CANCEL A BOOKING
+
+Customers can cancel a booking directly through the My Bookings section of the Elixway app by selecting the relevant booking and choosing the cancellation option. Cancellations can also be requested through customer support if the customer is unable to complete the process through the app.
+
+EXCEPTIONS
+
+- If a booking is cancelled due to a verified failure on Elixway's part, such as no driver being assigned within a reasonable time after confirmation, no cancellation charge applies, and the customer may be eligible for a full refund.
+- If a driver cancels a trip after being assigned, this is treated as a platform-initiated cancellation, and the customer is not charged. Elixway will attempt to reassign a new driver where possible.
+- In cases of genuine emergencies, such as medical situations, customers may contact customer support to request a waiver of standard cancellation charges. Waiver approval is at the discretion of the support team and may require supporting information.
+- Cancellations due to severe weather conditions, natural disasters, or government-imposed travel restrictions may be treated as exceptions, subject to review by customer support.
+
+OUTSTATION AND MULTI-DAY BOOKINGS
+
+For outstation and multi-day rental bookings, cancellation charges may be higher due to advance driver and vehicle allocation, particularly for last-minute cancellations. Customers are encouraged to cancel as early as possible if plans change to minimize applicable charges.
+
+NO-SHOW POLICY
+
+If a customer is not present at the pickup location within a reasonable waiting period after the driver has arrived, and does not respond to contact attempts, the booking may be marked as a no-show. No-show bookings are typically treated similarly to late cancellations and may incur applicable charges. Refer to the waiting charges policy for details on standard waiting time allowances.
+
+CUSTOMER SUPPORT
+
+For any disputes regarding cancellation charges, or if a customer believes a cancellation was incorrectly processed, they should contact Elixway customer support with their booking ID for review and resolution.
