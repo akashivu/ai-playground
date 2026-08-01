@@ -1,4 +1,3 @@
-===== sedan.txt =====
 
 VEHICLE PROFILE: SEDAN
 

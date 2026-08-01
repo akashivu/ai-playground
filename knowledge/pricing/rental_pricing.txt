@@ -1,4 +1,4 @@
-===== rental_pricing.txt =====
+
 
 RENTAL CAB PRICING STRUCTURE
 

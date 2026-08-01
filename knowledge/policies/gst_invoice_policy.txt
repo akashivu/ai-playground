@@ -1,4 +1,4 @@
-===== gst_invoice_policy.txt =====
+
 
 GST INVOICE POLICY
 

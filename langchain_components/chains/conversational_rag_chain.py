@@ -17,9 +17,19 @@ def conversational_rag_workflow(data: dict) -> dict:
 
     context = "\n\n".join(item["chunk"] for item in retrieved_chunks)
 
+    print("\n================ RETRIEVED SOURCES ================\n")
+    for item in retrieved_chunks:
+        print(f"Source: {item['source']}")
+        print(f"Score : {item['score']}")
+        print("-" * 60)
+
+    print("\n================ CONTEXT SENT TO LLM ================\n")
+    print(context)
+    print("\n=====================================================\n")
+
     answer = rag_answer_chain.invoke({
-        "question": question,
-        "context": context,
+    "question": question,
+    "context": context,
     })
 
     return {
