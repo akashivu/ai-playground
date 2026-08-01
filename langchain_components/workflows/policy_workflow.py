@@ -14,7 +14,7 @@ def policy_workflow(state: dict) -> dict:
 
     results = hybrid_search_pipeline.invoke({
         "query": state["question"],
-        "collection": "elixway_policy",
+        "collection": "elixway",
     })
 
     print("QUESTION:", state["question"])

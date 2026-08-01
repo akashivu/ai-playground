@@ -14,7 +14,7 @@ def faq_workflow(state: dict) -> dict:
     results = hybrid_search_pipeline.invoke(
         {
             "query": state["question"],
-            "collection": "elixway_faq",
+            "collection": "elixway",
         })
 
     validation = (RetrievalValidator.validate(results))
