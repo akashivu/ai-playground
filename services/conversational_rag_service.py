@@ -1,5 +1,9 @@
 from services.retrieval_service import (RetrievalService,)
-from services.llm_services import (generate_query_rewrite,generate_rag_response,)
+from services.llm_services import generate_rag_response
+
+from langchain_components.chains.query_rewrite_chain import (
+    query_rewrite_chain,
+)
 
 class ConversationalRAGService:
 
@@ -10,21 +14,22 @@ class ConversationalRAGService:
         self.hybrid_retrieval_service = ( hybrid_retrieval_service)
         self.evaluation_service = (evaluation_service)
 
-    async def rewrite_query(self,messages):
-            history = "\n".join([f"{msg.role}: {msg.content}"for msg in messages])
-            prompt = f"""
-                    Conversation:
+    async def rewrite_query(self, messages):
+        history = "\n".join(
+            f"{msg.role}: {msg.content}"
+            for msg in messages[:-1]
+        )
 
-                    {history}
+        latest_question = messages[-1].content
 
-                    Rewrite the latest user question
-                    into a standalone search query.
+        rewritten_query = query_rewrite_chain.invoke(
+            {
+                "history": history,
+                "question": latest_question,
+            }
+        )
 
-                    Only return the rewritten query.
-                    """
-            
-            rewritten_query = (await generate_query_rewrite(prompt))
-            return rewritten_query
+        return rewritten_query
     
 
     async def answer_question(self,messages,):
@@ -53,7 +58,7 @@ class ConversationalRAGService:
 
                  Use only the provided context
                  to answer the question."""
-         answer = await (generate_rag_response(prompt))
+         answer = await generate_rag_response(prompt)
 
          evaluation = await (self.evaluation_service.evaluate( latest_question,  context,answer,))
 
