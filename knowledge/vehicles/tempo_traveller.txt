@@ -1,5 +1,4 @@
 
-
 VEHICLE PROFILE: TEMPO TRAVELLER
 
 This document describes the tempo traveller vehicle category available on Elixway, designed for larger group travel. Exact vehicle models, seating configurations, and live availability are determined by the backend fleet system at the time of booking.

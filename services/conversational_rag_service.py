@@ -1,9 +1,9 @@
 from services.retrieval_service import (RetrievalService,)
-from services.llm_services import generate_rag_response
 
 from langchain_components.chains.query_rewrite_chain import (
     query_rewrite_chain,
 )
+from langchain_components.chains.rag_answer_chain import rag_answer_chain
 
 class ConversationalRAGService:
 
@@ -22,7 +22,7 @@ class ConversationalRAGService:
 
         latest_question = messages[-1].content
 
-        rewritten_query = query_rewrite_chain.invoke(
+        rewritten_query = await query_rewrite_chain.ainvoke(
             {
                 "history": history,
                 "question": latest_question,
@@ -42,23 +42,13 @@ class ConversationalRAGService:
          
 
          context = "\n\n".join([item["chunk"]for item in results])
-         history = "\n".join([f"{msg.role}: {msg.content}"for msg in messages])
-         prompt = f"""
-                  Conversation:
 
-                 {history}
-
-                 Context:
-
-                 {context}
-
-                 Question:
-
-                 {latest_question}
-
-                 Use only the provided context
-                 to answer the question."""
-         answer = await generate_rag_response(prompt)
+         answer = await rag_answer_chain.ainvoke(
+             {
+                 "question": latest_question,
+                 "context": context,
+             }
+         )
 
          evaluation = await (self.evaluation_service.evaluate( latest_question,  context,answer,))
 
