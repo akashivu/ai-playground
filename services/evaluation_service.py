@@ -1,4 +1,7 @@
-from services.llm_services import (generate_rag_response,)
+from langchain_components.chains.evaluation_chain import evaluation_chain
+from langchain_components.chains.hallucination_chain import hallucination_chain
+
+import json
 import json
 
 class EvaluationService:
@@ -34,7 +37,13 @@ class EvaluationService:
             }}
             """
 
-        evaluation = await (generate_rag_response(prompt))
+        evaluation = await evaluation_chain.ainvoke(
+    {
+        "question": question,
+        "context": context,
+        "answer": answer,
+    }
+)
 
         return json.loads(evaluation)
     
@@ -61,7 +70,12 @@ Return JSON only:
 }}
 """
 
-        result = await (generate_rag_response(prompt))
+        result = await hallucination_chain.ainvoke(
+    {
+        "context": context,
+        "answer": answer,
+    }
+)
 
         return json.loads(result)
 
