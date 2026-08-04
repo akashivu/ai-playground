@@ -4,6 +4,7 @@ from langchain_components.runnables.hybrid_search_pipeline import (hybrid_search
 from services.retrieval_validator import (RetrievalValidator,)
 from langchain_components.chains.rag_answer_chain import rag_answer_chain
 
+
 @register_workflow(IntentType.FAQ)
 def faq_workflow(state: dict) -> dict:
     """
@@ -15,24 +16,40 @@ def faq_workflow(state: dict) -> dict:
         {
             "query": state["question"],
             "collection": "elixway",
-        })
+        }
+    )
 
-    validation = (RetrievalValidator.validate(results))
+    print("========== FAQ RESULTS ==========")
+    for i, item in enumerate(results, 1):
+        print(f"\nResult {i}")
+        print("Source:", item["source"])
+        print(item["chunk"][:500])
+
+    validation = RetrievalValidator.validate(results)
 
     if not validation.is_valid:
-        return { "answer": ( "I couldn't find a matching FAQ. " "Please contact Elixway support.")}
-    context = "\n\n".join(
-    item["chunk"]
-    for item in results[:3]
-    )
+        return {
+            "answer": (
+                "I couldn't find a matching FAQ. "
+                "Please contact Elixway support."
+            )
+        }
+
+    context = "\n\n".join(item["chunk"] for item in results[:6])
+
+    print("\n========== CONTEXT ==========")
+    print(context)
 
     answer = rag_answer_chain.invoke(
-    {
-        "question": state["question"],
-        "context": context,
-    }
+        {
+            "question": state["question"],
+            "context": context,
+        }
     )
 
+    print("\n========== LLM ANSWER ==========")
+    print(answer)
+
     return {
-    "answer": answer,
+        "answer": answer,
     }
