@@ -2,7 +2,7 @@ from langchain_components.registry.workflow_decorator import (register_workflow,
 from langchain_components.routing.intent_types import (IntentType,)
 from langchain_components.runnables.hybrid_search_pipeline import (hybrid_search_pipeline,)
 from services.retrieval_validator import (RetrievalValidator,)
-
+from langchain_components.chains.rag_answer_chain import rag_answer_chain
 
 @register_workflow(IntentType.FAQ)
 def faq_workflow(state: dict) -> dict:
@@ -21,6 +21,18 @@ def faq_workflow(state: dict) -> dict:
 
     if not validation.is_valid:
         return { "answer": ( "I couldn't find a matching FAQ. " "Please contact Elixway support.")}
-    answer = "\n\n".join( item["chunk"] for item in results[:3])
+    context = "\n\n".join(
+    item["chunk"]
+    for item in results[:3]
+    )
 
-    return { "answer": answer,}
+    answer = rag_answer_chain.invoke(
+    {
+        "question": state["question"],
+        "context": context,
+    }
+    )
+
+    return {
+    "answer": answer,
+    }
