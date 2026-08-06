@@ -41,7 +41,7 @@ def _chunk_to_result(chunk: KnowledgeChunk, score: float, rank: int) -> Retrieva
 
 
 class SimpleVectorSearch:
-  
+    
 
     def __init__(self, chunks: list[KnowledgeChunk]):
         self.chunks = chunks

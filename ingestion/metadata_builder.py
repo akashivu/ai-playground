@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from .models import KnowledgeChunk
+from ingestion.models import KnowledgeChunk
 
-# The schema every chunk's metadata must satisfy before embedding.
+
 REQUIRED_FIELDS = ("collection", "category", "topic", "source", "document_id")
 
 

@@ -4,15 +4,15 @@ from __future__ import annotations
 
 import re
 
-from .models import KnowledgeChunk, KnowledgeDocument
+from ingestion.models import KnowledgeChunk, KnowledgeDocument
 
-# Explicit section delimiter, e.g. "----------------"
+
 _DELIMITER_RE = re.compile(r"^\s*-{3,}\s*$", re.MULTILINE)
 
-# A heading line: short, no trailing period, mostly upper case
+
 _HEADING_RE = re.compile(r"^(?=.{2,60}$)[A-Z][A-Z0-9 &/'\-]+$")
 
-# A "Question:" marker (case-insensitive), used to split FAQ blocks
+
 _QUESTION_RE = re.compile(r"^\s*Question\s*:\s*", re.IGNORECASE | re.MULTILINE)
 
 
@@ -22,25 +22,35 @@ def _slugify(text: str) -> str:
 
 
 def split_faq(document: KnowledgeDocument) -> list[KnowledgeChunk]:
-    
+    """
+    Split a Q&A-style document into one chunk per Question/Answer pair.
+
+    Input shape:
+        Question:
+        How do I book a ride?
+        Answer:
+        ...
+        Question:
+        Can I travel with pets?
+        Answer:
+        ...
+    """
     content = document.content
 
     # Drop everything before the first "Question:" (e.g. a "BOOKING FAQ" title line)
     first_match = _QUESTION_RE.search(content)
     if not first_match:
-        # No Question/Answer markers found — fall back to treating the
-        # whole document as a single chunk rather than silently dropping it.
+       
         return split_generic(document)
 
     body = content[first_match.start():]
-    # Re-split on the Question marker, keeping "Question:" as the block start
+   
     pieces = _QUESTION_RE.split(body)
     pieces = [p.strip() for p in pieces if p.strip()]
 
     chunks: list[KnowledgeChunk] = []
     for i, piece in enumerate(pieces):
-        # `piece` is everything after "Question:" up to the next "Question:"
-        # First line is the question text; rest (incl. "Answer:") is the answer.
+       
         lines = piece.splitlines()
         question_text = lines[0].strip()
         rest = "\n".join(lines[1:]).strip()

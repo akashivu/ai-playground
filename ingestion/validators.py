@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from .models import KnowledgeChunk
+from ingestion.models import KnowledgeChunk
 
 logger = logging.getLogger(__name__)
 
