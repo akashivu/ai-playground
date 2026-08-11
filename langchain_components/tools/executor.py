@@ -25,6 +25,7 @@ from langchain_components.tools.registry import ToolRegistry, tool_registry
 from langchain_components.tools.schemas import (
     ToolAuditRecord,
     ToolCallContext,
+    ToolErrorType,
     ToolResult,
 )
 
@@ -48,7 +49,7 @@ def _default_audit_sink(record: ToolAuditRecord) -> None:
 
 
 class ToolExecutor:
-    
+
     def __init__(
         self,
         registry: ToolRegistry | None = None,
@@ -88,8 +89,17 @@ class ToolExecutor:
             validated = self._validate(tool.name, tool.schema, raw_input)
         except (ToolPermissionError, ToolValidationError) as exc:
             duration_ms = (time.perf_counter() - start) * 1000
+            error_type = (
+                ToolErrorType.PERMISSION
+                if isinstance(exc, ToolPermissionError)
+                else ToolErrorType.VALIDATION
+            )
             error_result = ToolResult.fail(
-                error=str(exc), tool_name=tool.name, duration_ms=duration_ms, retries=0
+                error=str(exc),
+                error_type=error_type,
+                tool_name=tool.name,
+                duration_ms=duration_ms,
+                retries=0,
             )
             self._audit_invalid(
                 context, tool.name, raw_input, error_result, duration_ms
@@ -102,6 +112,7 @@ class ToolExecutor:
 
         retries_used = 0
         last_error: Exception | None = None
+        last_error_type: ToolErrorType | None = None
         attempts_allowed = max(1, tool.max_retries + 1)
 
         for attempt in range(attempts_allowed):
@@ -124,14 +135,17 @@ class ToolExecutor:
 
             except asyncio.TimeoutError:
                 last_error = ToolTimeoutError(tool.name, tool.timeout_seconds)
+                last_error_type = ToolErrorType.TIMEOUT
                 self._hooks.fire_error(tool.name, context, last_error)
             except ToolError as exc:
                 last_error = exc
+                last_error_type = ToolErrorType.EXECUTION
                 self._hooks.fire_error(tool.name, context, exc)
                 if not tool.idempotent:
                     break  # don't blindly retry non-idempotent failures
             except Exception as exc:  # noqa: BLE001 — translate every unknown error
                 last_error = ToolExecutionError(tool.name, str(exc), cause=exc)
+                last_error_type = ToolErrorType.EXECUTION
                 self._hooks.fire_error(tool.name, context, last_error)
                 if not tool.idempotent:
                     break
@@ -142,6 +156,7 @@ class ToolExecutor:
         duration_ms = (time.perf_counter() - start) * 1000
         error_result = ToolResult.fail(
             error=str(last_error) if last_error else "Unknown tool failure",
+            error_type=last_error_type,
             tool_name=tool.name,
             duration_ms=duration_ms,
             retries=retries_used,
@@ -192,7 +207,7 @@ class ToolExecutor:
         result: ToolResult,
         duration_ms: float,
     ) -> None:
-        
+
         self._emit_audit(context, tool_name, raw_input, result, duration_ms, 0)
 
     def _emit_audit(

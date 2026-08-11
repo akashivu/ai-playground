@@ -61,10 +61,7 @@ def detect_language(text: str) -> str:
     if _looks_english(text):
         return "en"
 
-    # Latin-script text with no obvious English function words: only
-    # trust statistical detection on longer queries; short ones default
-    # to English since a short low-confidence guess is worse than a
-    # default that the rest of the pipeline is built to handle anyway.
+    
     if len(text.split()) >= _MIN_WORDS_FOR_STATISTICAL_DETECTION:
         try:
             from langdetect import detect
