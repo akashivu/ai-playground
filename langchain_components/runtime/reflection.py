@@ -24,6 +24,7 @@ remaining steps you were given — never invent one.
 
 class LLMReflector(Protocol):
     
+
     async def decide(self, prompt_context: ReflectionPromptContext) -> ReflectionDecision: ...
 
 
@@ -41,7 +42,6 @@ class NullLLMReflector:
 
 class LangChainLLMReflector:
     
-
     def __init__(self, model):
         self._structured_model = model.with_structured_output(ReflectionDecision)
 
@@ -50,7 +50,10 @@ class LangChainLLMReflector:
         try:
             decision = await self._structured_model.ainvoke(prompt)
         except Exception as exc:
-            logger.error("LLM reflection call failed or returned invalid output: %s", exc)
+            logger.error(
+                "execution=%s LLM reflection call failed or returned invalid output: %s",
+                prompt_context.execution_id, exc,
+            )
             return ReflectionDecision(
                 action=ReflectionAction.ABORT,
                 reason=f"LLM reflection failed: {exc}",
@@ -58,7 +61,10 @@ class LangChainLLMReflector:
             )
 
         if not isinstance(decision, ReflectionDecision):
-            logger.error("LLM reflection returned unexpected type: %r", type(decision))
+            logger.error(
+                "execution=%s LLM reflection returned unexpected type: %r",
+                prompt_context.execution_id, type(decision),
+            )
             return ReflectionDecision(
                 action=ReflectionAction.ABORT,
                 reason="LLM reflection did not return a ReflectionDecision",
@@ -108,7 +114,8 @@ class ReflectionEngine:
 
         failed_result = self._find_failed_tool_result(result)
         if failed_result is None:
-            
+            # step failed before producing a ToolResult at all — e.g. the
+            # tool wasn't registered. Nothing to retry or ask the user about.
             return ReflectionDecision(
                 action=ReflectionAction.ABORT,
                 reason=f"Step '{result.failed_step}' failed before producing a result "
@@ -144,7 +151,7 @@ class ReflectionEngine:
                 referenced_tool=failed_result.tool_name,
             )
 
-       
+        
         return None
 
     async def _llm_check(self, context: RuntimeContext, result: ExecutionResult) -> ReflectionDecision:
@@ -158,21 +165,24 @@ class ReflectionEngine:
             error=failed_result.error if failed_result else None,
             remaining_step_names=remaining,
             available_tool_names=list(available_tools),
+            execution_id=context.trace_id,
         )
 
         try:
             decision = await self._llm_reflector.decide(prompt_context)
         except Exception as exc:
-            # defense in depth — even a misbehaving custom LLMReflector
-            # implementation can't crash the runtime or leave no decision
-            logger.error("LLM reflector raised unexpectedly: %s", exc)
+            
+            logger.error(
+                "execution=%s session=%s LLM reflector raised unexpectedly: %s",
+                context.trace_id, context.state.session_id, exc,
+            )
             return ReflectionDecision(
                 action=ReflectionAction.ABORT,
                 reason=f"LLM reflector raised an exception: {exc}",
                 source="fallback",
             )
 
-       
+        
         if decision.source != "fallback":
             decision.source = "llm"
         return decision

@@ -16,16 +16,17 @@ class ReflectionAction(str, enum.Enum):
 
 class ReflectionDecision(BaseModel):
     
+
     action: ReflectionAction
     reason: str
 
     
     retry_step: str | None = None
 
-
+    # required when action == ASK_USER — shown to the user as-is
     ask_user_message: str | None = None
 
-   
+    
     referenced_tool: str | None = None
 
     source: Literal["deterministic", "llm", "fallback", "runtime"] = "deterministic"
@@ -39,3 +40,4 @@ class ReflectionPromptContext(BaseModel):
     error: str | None
     remaining_step_names: list[str] = Field(default_factory=list)
     available_tool_names: list[str] = Field(default_factory=list)
+    execution_id: str = ""
