@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import enum
 import time
 import uuid
 from typing import Any
@@ -7,11 +8,22 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class ToolErrorType(str, enum.Enum):
+    """Structured failure category — set by ToolExecutor, not inferred from error message text by anything downstream (e.g. Reflection)."""
+
+    NOT_FOUND = "not_found"
+    VALIDATION = "validation"
+    PERMISSION = "permission"
+    TIMEOUT = "timeout"
+    EXECUTION = "execution"
+
+
 class ToolResult(BaseModel):
-    
+
     success: bool
     data: Any = None
     error: str | None = None
+    error_type: ToolErrorType | None = None
     tool_name: str | None = None
     execution_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     duration_ms: float | None = None
@@ -23,16 +35,14 @@ class ToolResult(BaseModel):
         return cls(success=True, data=data, **kwargs)
 
     @classmethod
-    def fail(cls, error: str, **kwargs: Any) -> "ToolResult":
-        return cls(success=False, error=error, **kwargs)
+    def fail(
+        cls, error: str, error_type: ToolErrorType | None = None, **kwargs: Any
+    ) -> "ToolResult":
+        return cls(success=False, error=error, error_type=error_type, **kwargs)
 
 
 class ToolCallContext(BaseModel):
-    """Caller identity/context passed alongside a tool request.
-
-    Kept separate from a tool's own input schema so tools stay
-    ignorant of auth/session concerns — only the executor reads this.
-    """
+    
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -47,7 +57,7 @@ class ToolCallContext(BaseModel):
 
 
 class ToolAuditRecord(BaseModel):
-    """A single logged tool invocation — the unit of the audit trail."""
+   
 
     trace_id: str
     tool_name: str

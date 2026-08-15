@@ -1,4 +1,4 @@
-from langchain_components.memory.conversation_store import ConversationStore
+from langchain_components.memory.conversation.conversation_store import ConversationStore
 
 
 def test_add_and_get_message():

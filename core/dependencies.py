@@ -18,7 +18,7 @@ from services.bm25_service import (BM25Service,)
 from services.hybrid_retrieval_service import (HybridRetrievalService,)
 
 import os
-from langchain_components.memory.persistent_conversation_store import PersistentConversationStore
+from langchain_components.memory.conversation.persistent_conversation_store import PersistentConversationStore
 
 from services.evaluation_service import (EvaluationService,)
 from services.benchmark_service import (BenchmarkService,)
