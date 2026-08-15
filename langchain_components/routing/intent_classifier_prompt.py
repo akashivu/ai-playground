@@ -1,63 +1,83 @@
 from langchain_core.prompts import PromptTemplate
 from langchain_components.routing.intent_types import IntentType
 
-_INTENT_DEFINITIONS = (
-    "FAQ: Frequently asked questions about policies, services, or business rules.\n"
-    "POLICY: Questions about company policies, including cancellation, refunds, rescheduling, payments, waiting charges, luggage, driver rules, tolls, privacy, terms and conditions, and booking rules.\n"
-    "KNOWLEDGE_SEARCH: Questions requiring retrieval from documents, guides, or knowledge base.\n"
-    "BOOKING: Requests to book, reserve, schedule, or arrange a cab or service. "
-    "Includes intercity, outstation, airport, local, and any city-to-city trips.\n"
-    "RECOMMENDATION: Requests for trip suggestions, vehicle recommendations, or travel plans.\n"
-    "ITINERARY: Requests to plan a trip, create a day-wise itinerary, vacation plan, travel schedule, places "
-    "to visit, or a full multi-day travel plan for a destination.\n"
-    "PRICING: Any question about cost, fare, price, rate, or charges for a trip or service.\n"
-    "ITINERARY: Requests to plan a trip, create a day-wise travel plan, or get an itinerary. "
-    "Includes requests mentioning days, places to visit, travel schedule, or trip planning.\n"
-    "GENERAL: Greetings, casual conversation, or simple travel-related chat.\n"
-    "OUT_OF_DOMAIN: Requests unrelated to travel, bookings, or pricing — "
-    "including coding, writing, tutoring, or general knowledge."
+
+INTENT_DEFINITIONS = (
+    "FAQ: Informational questions about how Elixway works, "
+    "how to use features, booking capabilities, procedures, or common customer questions.\n"
+
+    "POLICY: Questions about company policies, rules, cancellation, refunds, "
+    "rescheduling, payments, waiting charges, luggage, driver rules, tolls, privacy, "
+    "terms, booking rules, and other policy-specific requirements.\n"
+
+    "KNOWLEDGE_SEARCH: Questions requiring retrieval from documents, guides, "
+    "or the Elixway knowledge base where the answer is primarily informational "
+    "and not better classified as a specific policy, pricing, booking, or itinerary request.\n"
+
+    "BOOKING: Explicit requests to perform or start a booking action, such as "
+    "booking, reserving, scheduling, or arranging a ride/service.\n"
+
+    "BOOKING_STATUS: Questions asking about the current status, progress, confirmation, "
+    "driver assignment, or state of an existing booking.\n"
+
+    "RECOMMENDATION: Requests for trip suggestions, vehicle recommendations, "
+    "destination recommendations, or travel planning suggestions.\n"
+
+    "PRICING: Questions about price, fare, cost, rates, charges, surcharges, "
+    "or other trip/service pricing.\n"
+
+    "ITINERARY: Requests to create or plan a trip, day-wise itinerary, travel schedule, "
+    "places to visit, or a multi-day travel plan.\n"
+
+    "GENERAL: Greetings, casual conversation, or simple travel-related questions "
+    "that do not fit another intent.\n"
+
+    "OUT_OF_DOMAIN: Requests unrelated to Elixway travel, bookings, pricing, "
+    "or supported travel assistance, including coding, writing, tutoring, or general knowledge."
 )
 
-_EXAMPLES = (
+
+EXAMPLES = (
     "Examples:\n"
 
+    
+    "User: Can I book a round trip? -> FAQ\n"
+    "User: How do I book a round trip? -> FAQ\n"
+    "User: Is round-trip booking available? -> FAQ\n"
+    "User: Can I book a ride for someone else? -> FAQ\n"
+    "User: What happens after I confirm a booking? -> FAQ\n"
+    "User: How far in advance can I book? -> FAQ\n"
+
+    "User: Book me a round trip. -> BOOKING\n"
+    "User: I want to book a round trip. -> BOOKING\n"
+    "User: Book a cab from Bangalore to Goa. -> BOOKING\n"
+    "User: Create a booking from Bangalore to Delhi. -> BOOKING\n"
+    "User: Reserve an Innova for airport pickup. -> BOOKING\n"
+    "User: Schedule a cab for tomorrow morning. -> BOOKING\n"
+
+    
     "User: How much is airport pickup? -> PRICING\n"
     "User: What is the fare for Mysore? -> PRICING\n"
     "User: Cab cost to Bangalore airport? -> PRICING\n"
-    "User: Price for one-way trip? -> PRICING\n"
     "User: What is the round-trip cost? -> PRICING\n"
-    "User: Book a cab to Coorg -> BOOKING\n"
-    "User: Book cab from Bangalore to Delhi -> BOOKING\n"
-    "User: I need a cab from Mysore to Chennai -> BOOKING\n"
-    "User: Book an outstation trip to Mumbai -> BOOKING\n"
-    "User: Need a cab tomorrow morning -> BOOKING\n"
-    "User: Reserve an Innova for airport pickup -> BOOKING\n"
-    "User: Plan a 5-day trip to Goa -> ITINERARY\n"
-    "User: Create an itinerary for Delhi -> ITINERARY\n"
-    "User: Plan a trip from Bangalore to Mumbai for 3 days -> ITINERARY\n"
-    "User: Places to visit in Rajasthan for 7 days -> ITINERARY\n"
-    "User: Travel plan for couple trip to Kerala -> ITINERARY\n"
+
+    # ---------------------------------------------------------
+    # FAQ
+    # ---------------------------------------------------------
     "User: What vehicles do you have? -> FAQ\n"
-    "User: Suggest a vehicle for 8 people -> RECOMMENDATION\n"
-    "User: Write Python code -> OUT_OF_DOMAIN\n"
-    "User: Hello -> GENERAL\n"
-    "User: What is machine learning? -> OUT_OF_DOMAIN\n"
+    "User: How can I share my trip status? -> FAQ\n"
 
-    "User: How much is airport pickup? → PRICING\n"
-    "User: What is the fare for Mysore? → PRICING\n"
-    "User: Cab cost to Bangalore airport? → PRICING\n"
-    "User: Price for one-way trip? → PRICING\n"
-    "User: What is the round-trip cost? → PRICING\n"
-    "User: Book a cab to Coorg → BOOKING\n"
-    "User: What vehicles do you have? → FAQ\n"
-    "User: Suggest a 3-day trip → RECOMMENDATION\n"
-    "User: Plan a 5-day trip to Goa → ITINERARY\n"
-    "User: Create itinerary for Kerala → ITINERARY\n"
-    "User: Places to visit in Mysore → ITINERARY\n"
-    "User: Plan my vacation → ITINERARY\n"
-    "User: Write Python code → OUT_OF_DOMAIN\n"
-    "User: Hello → GENERAL\n"
+    
+    "User: Suggest a vehicle for 8 people. -> RECOMMENDATION\n"
+    "User: Suggest a 3-day trip. -> RECOMMENDATION\n"
 
+    
+    "User: Plan a 5-day trip to Goa. -> ITINERARY\n"
+    "User: Create an itinerary for Kerala. -> ITINERARY\n"
+    "User: Places to visit in Mysore for 3 days. -> ITINERARY\n"
+    "User: Plan my vacation. -> ITINERARY\n"
+
+    
     "User: What is your cancellation policy? -> POLICY\n"
     "User: Can I cancel my booking? -> POLICY\n"
     "User: Is there a refund? -> POLICY\n"
@@ -70,30 +90,63 @@ _EXAMPLES = (
     "User: What is your luggage policy? -> POLICY\n"
     "User: What are your payment terms? -> POLICY\n"
 
+    
+    "User: Hello -> GENERAL\n"
+    "User: Write Python code -> OUT_OF_DOMAIN\n"
+    "User: What is machine learning? -> OUT_OF_DOMAIN"
 )
+
 
 intent_classifier_prompt = PromptTemplate(
     input_variables=["question"],
     partial_variables={
-        "valid_intents": ", ".join(IntentType.values()),
-        "intent_definitions": _INTENT_DEFINITIONS,
-        "examples": _EXAMPLES,
+        "valid_intents": ", ".join(
+            IntentType.values()
+        ),
+        "intent_definitions": INTENT_DEFINITIONS,
+        "examples": EXAMPLES,
     },
     template=(
-    "You are an intent classifier for a travel and cab booking platform.\n\n"
+        "You are the intent classifier for the Elixway travel and cab-booking platform.\n\n"
 
-    "Intent definitions:\n"
-    "{intent_definitions}\n\n"
+        "Intent definitions:\n"
+        "{intent_definitions}\n\n"
 
-    "{examples}\n"
+        "{examples}\n"
 
-    "Valid intents:\n"
-    "{valid_intents}\n\n"
+        "CRITICAL BOOKING VS FAQ RULE:\n"
+        "The presence of the word 'book' does NOT automatically mean BOOKING.\n\n"
 
-    "Question:\n"
-    "{question}\n\n"
+        "BOOKING is only for an explicit request to perform an action.\n"
+        "Examples:\n"
+        "- 'Book me a round trip.' -> BOOKING\n"
+        "- 'I want to book a cab.' -> BOOKING\n"
+        "- 'Create a booking from Bangalore to Goa.' -> BOOKING\n\n"
 
-    "Respond ONLY with valid JSON in exactly this format:\n"
-    '{{"intent":"<VALID_INTENT>"}}'
-)
+        "FAQ is for informational, capability, or procedural questions.\n"
+        "Examples:\n"
+        "- 'Can I book a round trip?' -> FAQ\n"
+        "- 'How do I book a round trip?' -> FAQ\n"
+        "- 'Is round-trip booking available?' -> FAQ\n"
+        "- 'Can I book a ride for someone else?' -> FAQ\n\n"
+
+        "Decision rule:\n"
+        "1. Determine whether the user is asking the assistant to DO something "
+        "or asking for INFORMATION about something.\n"
+        "2. If the user asks the assistant to perform/start a booking action, use BOOKING.\n"
+        "3. If the user asks whether booking is possible, how booking works, "
+        "or what booking options are available, use FAQ.\n"
+        "4. Never classify a question as BOOKING solely because it contains "
+        "the words 'book', 'booking', or 'ride'.\n"
+        "5. Choose exactly one intent.\n\n"
+
+        "Valid intents:\n"
+        "{valid_intents}\n\n"
+
+        "Question:\n"
+        "{question}\n\n"
+
+        "Respond ONLY with valid JSON in exactly this format:\n"
+        '{{"intent":"<VALID_INTENT>"}}'
+    ),
 )
