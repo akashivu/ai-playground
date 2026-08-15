@@ -1,4 +1,4 @@
-from langchain_components.memory.exceptions import MemorySaveError
+from langchain_components.memory.exceptions import MemoryStorageError
 from langchain_components.memory.runtime.models import SessionMemory
 
 
@@ -11,7 +11,7 @@ class SessionMemoryStore:
 
     def save(self, session: SessionMemory) -> None:
         if not session.session_id:
-            raise MemorySaveError("session_id is required")
+            raise MemoryStorageError("session_memory","session_id is required",)
         self._sessions[session.session_id] = session
 
     def clear(self, session_id: str) -> None:

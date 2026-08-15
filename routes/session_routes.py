@@ -4,7 +4,7 @@ from models.session_model import (
     SessionMessagesResponse,
     DeleteSessionResponse,
 )
-from langchain_components.memory.runtime.session_memory import create_session
+from langchain_components.memory.runtime.session import create_session
 from core.dependencies import conversation_store
 
 router = APIRouter()

@@ -29,7 +29,7 @@ def policy_workflow(state: dict) -> dict:
             )
         }
 
-    context = "\n\n".join(result["chunk"] for result in results[:3])
+    context = "\n\n".join(result["chunk"] for result in results[:5])
 
     answer = get_policy_chain().invoke({
     "context": context,
