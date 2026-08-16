@@ -40,7 +40,13 @@ async def chat(
             question=body.question,
         )
 
-        return ChatResponse(session_id=response.session_id,answer=response.answer,)
+        return ChatResponse(
+            session_id=response.session_id,
+            answer=response.answer,
+            intent=response.intent,
+            completed=response.completed,
+            metadata=response.metadata,
+        )
 
     except Exception:
         logger.exception("Chat endpoint failed")

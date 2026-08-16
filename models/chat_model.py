@@ -20,3 +20,6 @@ class SearchRequest(BaseModel):
 class ChatResponse(BaseModel):
     session_id: str
     answer: str
+    intent: str | None = None
+    completed: bool = False
+    metadata: dict | None = None
