@@ -4,19 +4,11 @@ from pydantic import BaseModel, Field
 
 
 class PhotoAttribution(BaseModel):
-    """
-    Attribution information associated with a Google Place photo.
-    """
-
     display_name: str | None = None
     uri: str | None = None
 
 
-class DestinationVisual(BaseModel):
-    """
-    Visual information for a destination/place.
-    """
-
+class PlaceVisual(BaseModel):
     name: str
     place_id: str | None = None
     address: str | None = None
@@ -27,9 +19,16 @@ class DestinationVisual(BaseModel):
     )
 
 
-class DestinationVisualResponse(BaseModel):
-    """
-    Visual enrichment result returned by the service.
-    """
+class VisualDay(BaseModel):
+    day: int
+    title: str
+    places: list[PlaceVisual] = Field(
+        default_factory=list
+    )
 
-    destination: DestinationVisual | None = None
+
+class DestinationVisualResponse(BaseModel):
+    destination: PlaceVisual | None = None
+    days: list[VisualDay] = Field(
+        default_factory=list
+    )

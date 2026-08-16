@@ -9,45 +9,30 @@ from config.settings import settings
 
 logger = logging.getLogger(__name__)
 
-
-PLACES_TEXT_SEARCH_URL = (
-    "https://places.googleapis.com/v1/places:searchText"
-)
-
-PLACES_PHOTO_BASE_URL = (
-    "https://places.googleapis.com/v1/"
-)
+TEXT_SEARCH_URL = "https://places.googleapis.com/v1/places:searchText"
+PHOTO_MEDIA_BASE_URL = "https://places.googleapis.com/v1"
 
 
 class GooglePlacesClient:
-    """
-    Minimal Google Places API (New) client.
-
-    This client is backend-only and never exposes the API key
-    to the frontend.
-    """
-
     def __init__(
         self,
         api_key: str | None = None,
         timeout: float | None = None,
     ) -> None:
-        self._api_key = (
-            api_key
-            or settings.GOOGLE_MAPS_API_KEY
-        )
-
+        self._api_key = api_key or settings.GOOGLE_MAPS_API_KEY
         self._timeout = (
             timeout
             if timeout is not None
             else settings.GOOGLE_PLACES_TIMEOUT_SECONDS
         )
 
-    def search_destination(
+    def search_place(
         self,
         query: str,
     ) -> dict[str, Any] | None:
-        if not query.strip():
+        query = query.strip()
+
+        if not query:
             return None
 
         headers = {
@@ -62,21 +47,17 @@ class GooglePlacesClient:
             ),
         }
 
-        payload = {
-            "textQuery": query.strip(),
-            "pageSize": 1,
-        }
-
         try:
             response = httpx.post(
-                PLACES_TEXT_SEARCH_URL,
+                TEXT_SEARCH_URL,
                 headers=headers,
-                json=payload,
+                json={
+                    "textQuery": query,
+                    "pageSize": 1,
+                },
                 timeout=self._timeout,
             )
-
             response.raise_for_status()
-
         except httpx.HTTPError:
             logger.exception(
                 "Google Places search failed query=%s",
@@ -84,34 +65,38 @@ class GooglePlacesClient:
             )
             return None
 
-        data = response.json()
+        places = response.json().get("places", [])
+        return places[0] if places else None
 
-        places = data.get("places", [])
-
-        if not places:
-            logger.info(
-                "Google Places returned no result query=%s",
-                query,
-            )
-            return None
-
-        return places[0]
-
-    def build_photo_url(
+    def resolve_photo_uri(
         self,
         photo_name: str,
         *,
         max_width_px: int = 1200,
-    ) -> str:
-        """
-        Returns a Place Photos (New) media endpoint.
+    ) -> str | None:
+        if not photo_name:
+            return None
 
-        The caller can request this URL from the backend.
-        """
-
-        return (
-            f"{PLACES_PHOTO_BASE_URL}"
-            f"{photo_name}/media"
-            f"?maxWidthPx={max_width_px}"
-            f"&key={self._api_key}"
+        url = (
+            f"{PHOTO_MEDIA_BASE_URL}/{photo_name}/media"
         )
+
+        try:
+            response = httpx.get(
+                url,
+                params={
+                    "key": self._api_key,
+                    "maxWidthPx": max_width_px,
+                    "skipHttpRedirect": "true",
+                },
+                timeout=self._timeout,
+            )
+            response.raise_for_status()
+        except httpx.HTTPError:
+            logger.exception(
+                "Google Place Photo request failed photo=%s",
+                photo_name,
+            )
+            return None
+
+        return response.json().get("photoUri")

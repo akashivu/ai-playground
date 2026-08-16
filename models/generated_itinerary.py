@@ -11,14 +11,10 @@ class ItineraryPlace(BaseModel):
 class ItineraryDay(BaseModel):
     day: int
     title: str
-    places: list[ItineraryPlace] = Field(
-        default_factory=list
-    )
+    places: list[ItineraryPlace] = Field(default_factory=list)
 
 
 class GeneratedItinerary(BaseModel):
     title: str
     answer_markdown: str
-    days: list[ItineraryDay] = Field(
-        default_factory=list
-    )
+    days: list[ItineraryDay] = Field(default_factory=list)

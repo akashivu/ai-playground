@@ -4,6 +4,7 @@ from utils.logger import logger
 from auth.schemas import CurrentUser
 from models.ai_response import AIResponse
 from models.conversation_state import ConversationState
+from models.generated_itinerary import GeneratedItinerary
 
 from langchain_components.routing.intent_router import (
     route_question,
@@ -97,9 +98,11 @@ class ConversationManager:
             session_id=session_id,
         )
 
-        booking_details = booking_session_service.get_booking(
-            user_id=user_id,
-            session_id=session_id,
+        booking_details = (
+            booking_session_service.get_booking(
+                user_id=user_id,
+                session_id=session_id,
+            )
         )
 
         previous_recommendation = (
@@ -426,69 +429,78 @@ class ConversationManager:
         """
         Build the final API response.
 
-        For completed or partially completed itinerary flows,
-        enrich the destination with visual information and
-        expose it through response metadata.
+        For itinerary results, validate the generated itinerary
+        and enrich the destination with visual information.
         """
-
-        # -----------------------------------------------------
-        # EXISTING METADATA
-        # -----------------------------------------------------
 
         metadata = dict(
             result.get("metadata") or {}
         )
 
+        intent = result.get("intent")
+
         # -----------------------------------------------------
-        # ITINERARY DESTINATION VISUAL ENRICHMENT
+        # ITINERARY VISUAL ENRICHMENT
         # -----------------------------------------------------
 
-        if (
-            result.get("intent") == IntentType.ITINERARY
-            or result.get("intent")
-            == IntentType.ITINERARY.value
-        ):
+        is_itinerary = (
+            intent == IntentType.ITINERARY
+            or intent == IntentType.ITINERARY.value
+        )
+
+        if is_itinerary:
+            generated = result.get(
+                "generated_itinerary"
+            )
+
             itinerary_details = result.get(
                 "itinerary_details"
             )
 
-            if itinerary_details:
-                destination = itinerary_details.get(
-                    "destination"
-                )
+            if generated and itinerary_details:
+                try:
+                    generated_itinerary = (
+                        GeneratedItinerary.model_validate(
+                            generated
+                        )
+                    )
 
-                if destination:
-                    try:
-                        visual_result = (
-                            destination_visual_service
-                            .enrich_destination(
-                                destination
+                    destination = itinerary_details.get(
+                        "destination"
+                    )
+
+                    if destination:
+                        visuals = (
+                            destination_visual_service.enrich(
+                                destination=destination,
+                                itinerary=generated_itinerary,
                             )
                         )
 
-                        if visual_result.destination:
-                            metadata["visuals"] = (
-                                visual_result.model_dump()
-                            )
-
-                    except Exception:
-                        logger.exception(
-                            "Destination visual enrichment "
-                            "failed session=%s",
-                            session_id,
+                        metadata["visuals"] = (
+                            visuals.model_dump()
                         )
 
-        # -----------------------------------------------------
-        # FINAL RESPONSE
-        # -----------------------------------------------------
+                except Exception:
+                    logger.exception(
+                        "Destination visual enrichment failed "
+                        "session=%s",
+                        session_id,
+                    )
 
-        intent = result.get("intent")
+        # -----------------------------------------------------
+        # NORMALIZE INTENT
+        # -----------------------------------------------------
 
         if isinstance(
             intent,
             IntentType,
         ):
             intent = intent.value
+
+        # -----------------------------------------------------
+        # FINAL RESPONSE
+        # -----------------------------------------------------
 
         return AIResponse(
             session_id=session_id,

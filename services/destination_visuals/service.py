@@ -1,11 +1,17 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
+
+from models.generated_itinerary import (
+    GeneratedItinerary,
+)
 
 from services.destination_visuals.models import (
-    DestinationVisual,
     DestinationVisualResponse,
     PhotoAttribution,
+    PlaceVisual,
+    VisualDay,
 )
 from services.destination_visuals.places_client import (
     GooglePlacesClient,
@@ -16,10 +22,9 @@ logger = logging.getLogger(__name__)
 
 class DestinationVisualService:
     """
-    Enriches itinerary destinations with Google Place visuals.
+    Best-effort visual enrichment.
 
-    Visual enrichment is best-effort:
-    a failure here must never break itinerary generation.
+    A Google Places failure must never fail itinerary generation.
     """
 
     def __init__(
@@ -27,89 +32,109 @@ class DestinationVisualService:
         places_client: GooglePlacesClient | None = None,
     ) -> None:
         self._places_client = (
-            places_client
-            or GooglePlacesClient()
+            places_client or GooglePlacesClient()
         )
 
-    def enrich_destination(
+    def enrich(
         self,
         destination: str,
+        itinerary: GeneratedItinerary,
     ) -> DestinationVisualResponse:
-        if not destination.strip():
-            return DestinationVisualResponse()
 
-        place = self._places_client.search_destination(
-            f"{destination}, India"
+        destination_visual = self._resolve_place(
+            destination
         )
 
-        if not place:
-            return DestinationVisualResponse()
+        visual_days: list[VisualDay] = []
 
-        display_name = place.get(
-            "displayName",
-            {},
-        ).get(
-            "text",
-            destination,
-        )
+        for day in itinerary.days:
+            places: list[PlaceVisual] = []
 
-        photos = place.get(
-            "photos",
-            [],
-        )
+            for itinerary_place in day.places:
+                visual = self._resolve_place(
+                    itinerary_place.name,
+                    destination=destination,
+                )
 
-        image_url: str | None = None
-        attributions: list[PhotoAttribution] = []
+                if visual:
+                    places.append(visual)
 
-        if photos:
-            first_photo = photos[0]
-
-            photo_name = first_photo.get(
-                "name"
+            visual_days.append(
+                VisualDay(
+                    day=day.day,
+                    title=day.title,
+                    places=places,
+                )
             )
-
-            if photo_name:
-                image_url = (
-                    self._places_client.build_photo_url(
-                        photo_name
-                    )
-                )
-
-            for attribution in first_photo.get(
-                "authorAttributions",
-                [],
-            ):
-                attributions.append(
-                    PhotoAttribution(
-                        display_name=(
-                            attribution.get(
-                                "displayName"
-                            )
-                        ),
-                        uri=(
-                            attribution.get(
-                                "uri"
-                            )
-                        ),
-                    )
-                )
 
         return DestinationVisualResponse(
-            destination=DestinationVisual(
-                name=display_name,
-                place_id=place.get("id"),
-                address=place.get(
-                    "formattedAddress"
-                ),
-                google_maps_url=place.get(
-                    "googleMapsUri"
-                ),
-                image_url=image_url,
-                attributions=attributions,
+            destination=destination_visual,
+            days=visual_days,
+        )
+
+    def _resolve_place(
+        self,
+        name: str,
+        destination: str | None = None,
+    ) -> PlaceVisual | None:
+
+        query = name
+
+        if destination:
+            query = f"{name}, {destination}"
+
+        place = self._places_client.search_place(query)
+
+        if not place:
+            return None
+
+        display_name = (
+            place.get("displayName", {}).get(
+                "text"
             )
+            or name
+        )
+
+        photos = place.get("photos", [])
+        first_photo = photos[0] if photos else {}
+
+        image_url = None
+
+        photo_name = first_photo.get("name")
+        if photo_name:
+            image_url = (
+                self._places_client.resolve_photo_uri(
+                    photo_name
+                )
+            )
+
+        attributions: list[PhotoAttribution] = []
+
+        for attribution in first_photo.get(
+            "authorAttributions",
+            [],
+        ):
+            attributions.append(
+                PhotoAttribution(
+                    display_name=attribution.get(
+                        "displayName"
+                    ),
+                    uri=attribution.get("uri"),
+                )
+            )
+
+        return PlaceVisual(
+            name=display_name,
+            place_id=place.get("id"),
+            address=place.get(
+                "formattedAddress"
+            ),
+            google_maps_url=place.get(
+                "googleMapsUri"
+            ),
+            image_url=image_url,
+            attributions=attributions,
         )
 
 
-destination_visual_service = (
-    DestinationVisualService()
-)
+destination_visual_service = DestinationVisualService()
