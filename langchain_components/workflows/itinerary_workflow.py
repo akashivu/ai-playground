@@ -18,6 +18,7 @@ from langchain_components.chains.itinerary_extraction_chain import (
 
 from langchain_components.chains.itinerary_generation_chain import (
     itinerary_generation_chain,
+    itinerary_generation_parser,
 )
 
 from services.itinerary_session_service import (
@@ -92,17 +93,19 @@ def itinerary_workflow(
                 False,
         }
 
-    response = (
-        itinerary_generation_chain.invoke(
-            details.model_dump()
-        )
+    response = itinerary_generation_chain.invoke(
+    {
+        **details.model_dump(),
+        "format_instructions": (
+            itinerary_generation_parser
+            .get_format_instructions()
+        ),
+    }
     )
 
     return {
-        "answer":
-            response.content,
-            "itinerary_details":
-            itinerary,
-            "completed":
-            True,
-    }
+    "answer": response.answer_markdown,
+    "itinerary_details": itinerary,
+    "generated_itinerary": response.model_dump(),
+    "completed": True,
+}
