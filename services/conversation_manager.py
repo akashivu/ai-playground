@@ -1,7 +1,9 @@
 import time
 
 from utils.logger import logger
+
 from auth.schemas import CurrentUser
+
 from models.ai_response import AIResponse
 from models.conversation_state import ConversationState
 from models.generated_itinerary import GeneratedItinerary
@@ -10,10 +12,13 @@ from langchain_components.routing.intent_router import (
     route_question,
     execute_workflow,
 )
+
 from langchain_components.routing.intent_types import IntentType
+
 from langchain_components.routing.conversation_control import (
     classify_conversation_control,
 )
+
 from langchain_components.routing.conversation_control_prompt import (
     ConversationControl,
 )
@@ -23,18 +28,23 @@ from core.dependencies import conversation_store
 from services.recommendation_session_service import (
     recommendation_session_service,
 )
+
 from services.booking_session_service import (
     booking_session_service,
 )
+
 from services.itinerary_session_service import (
     itinerary_session_service,
 )
+
 from services.usage_tracking_service import (
     usage_tracking_service,
 )
+
 from services.token_tracking_service import (
     token_tracking_service,
 )
+
 from services.cost_estimation_service import (
     cost_estimation_service,
 )
@@ -233,7 +243,10 @@ class ConversationManager:
                 state.model_dump()
             )
 
-            if faq_result.get("intent") == IntentType.BOOKING:
+            if (
+                faq_result.get("intent")
+                == IntentType.BOOKING
+            ):
                 logger.warning(
                     "INTERRUPT routing recursed back into BOOKING "
                     "intent — using fallback response. "
@@ -431,6 +444,10 @@ class ConversationManager:
 
         For itinerary results, validate the generated itinerary
         and enrich the destination with visual information.
+
+        For flight-search results, expose the structured flight
+        search request through response metadata so the frontend
+        can execute the existing flight-search flow.
         """
 
         metadata = dict(
@@ -487,6 +504,19 @@ class ConversationManager:
                         "session=%s",
                         session_id,
                     )
+
+        # -----------------------------------------------------
+        # FLIGHT SEARCH METADATA
+        # -----------------------------------------------------
+
+        flight_search = result.get(
+            "flight_search"
+        )
+
+        if flight_search:
+            metadata["flight_search"] = (
+                flight_search
+            )
 
         # -----------------------------------------------------
         # NORMALIZE INTENT
