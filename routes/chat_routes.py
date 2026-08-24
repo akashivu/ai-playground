@@ -1,9 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from models.chat_model import ChatRequest, ChatResponse
 from services.rate_limit_service import rate_limit_service
-from langchain_components.conversation.conversation_manager import (
-    conversation_manager,
-)
+from services.conversation_manager import conversation_manager
 from utils.logger import logger
 from auth.schemas import CurrentUser
 from auth.optional_auth import get_current_or_guest_user
