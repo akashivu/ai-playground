@@ -1,23 +1,27 @@
 from __future__ import annotations
 
-from core.dependencies import conversation_store
-
 
 class FlightSearchSessionService:
     """
-    Persistent flight-search state for multi-turn conversations.
+    Persistent flight-search state using the existing
+    PersistentConversationStore instance.
 
-    State is scoped by user_id + session_id and survives
-    application restarts because it is stored in the
-    existing SQLite conversation database.
+    The conversation store is imported lazily inside methods
+    to avoid circular imports during application startup.
     """
+
+    @staticmethod
+    def _store():
+        from core.dependencies import conversation_store
+
+        return conversation_store
 
     def get(
         self,
         user_id: str,
         session_id: str,
     ) -> dict:
-        return conversation_store.get_flight_search(
+        return self._store().get_flight_search(
             user_id=user_id,
             session_id=session_id,
         )
@@ -28,7 +32,7 @@ class FlightSearchSessionService:
         session_id: str,
         flight_search: dict,
     ) -> None:
-        conversation_store.save_flight_search(
+        self._store().save_flight_search(
             user_id=user_id,
             session_id=session_id,
             flight_search_data=flight_search,
@@ -39,7 +43,7 @@ class FlightSearchSessionService:
         user_id: str,
         session_id: str,
     ) -> None:
-        conversation_store.clear_flight_search(
+        self._store().clear_flight_search(
             user_id=user_id,
             session_id=session_id,
         )
@@ -49,12 +53,6 @@ class FlightSearchSessionService:
         existing: dict,
         new_data: dict,
     ) -> dict:
-        """
-        Merge only meaningful new values.
-
-        Existing values are preserved when the new extraction
-        returns None or an empty string.
-        """
         merged = dict(existing)
 
         for key, value in new_data.items():
