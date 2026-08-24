@@ -34,6 +34,7 @@ INTENT_DEFINITIONS = (
 
     "OUT_OF_DOMAIN: Requests unrelated to Elixway travel, bookings, pricing, "
     "or supported travel assistance, including coding, writing, tutoring, or general knowledge."
+    "FLIGHT_SEARCH: Requests to search for flights between an origin and destination."
 )
 
 
@@ -54,7 +55,10 @@ EXAMPLES = (
     "User: Create a booking from Bangalore to Delhi. -> BOOKING\n"
     "User: Reserve an Innova for airport pickup. -> BOOKING\n"
     "User: Schedule a cab for tomorrow morning. -> BOOKING\n"
-
+    "User: Find flights from Mumbai to Dubai. -> FLIGHT_SEARCH"
+    "User: Search flights from Delhi to Bangkok on 2026-09-05. -> FLIGHT_SEARCH"
+    "User: Show me flights from Bangalore to Singapore. -> FLIGHT_SEARCH"
+    "User: What flights are available from Mumbai to Dubai? -> FLIGHT_SEARCH"
     
     "User: How much is airport pickup? -> PRICING\n"
     "User: What is the fare for Mysore? -> PRICING\n"

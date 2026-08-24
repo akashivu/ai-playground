@@ -24,6 +24,7 @@ from langchain_components.chains.itinerary_generation_chain import (
 from services.itinerary_session_service import (
     itinerary_session_service,
 )
+from langchain_components.workflows import flight_search_workflow
 
 from services.itinerary_validation_service import (
     find_missing_fields,

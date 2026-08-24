@@ -1,9 +1,7 @@
-import langchain_components.workflows.general_chat_workflow
-import langchain_components.workflows.knowledge_search_workflow
-import langchain_components.workflows.faq_workflow
-import langchain_components.workflows.pricing_workflow
-import langchain_components.workflows.out_of_domain_workflow
-import langchain_components.workflows.booking_workflow
-import langchain_components.workflows.booking_status_workflow
-import langchain_components.workflows.policy_workflow
-import langchain_components.workflows.itinerary_workflow
+"""
+Workflow package.
+
+Workflow modules are imported explicitly by the workflow registry.
+Keeping package initialization lightweight prevents unrelated workflow
+dependencies from being loaded when importing a single workflow.
+"""

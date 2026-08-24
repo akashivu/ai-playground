@@ -12,7 +12,7 @@ class IntentType(str, Enum):
     GENERAL = "GENERAL"
     OUT_OF_DOMAIN = "OUT_OF_DOMAIN"
     ITINERARY = "ITINERARY"
-
+    FLIGHT_SEARCH = "FLIGHT_SEARCH"
     @classmethod
     def values(cls) -> list[str]:
         return [e.value for e in cls]
