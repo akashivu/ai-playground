@@ -1,40 +1,183 @@
-from services.retrieval_service import (RetrievalService,)
+from __future__ import annotations
 
-from services.bm25_service import (BM25Service,)
+from services.retrieval_service import RetrievalService
+from services.bm25_service import BM25Service
+from services.reranking_service import RerankingService
 
 
 class HybridRetrievalService:
-    """Combines vector search and BM25 for hybrid retrieval."""
+    """
+    Combines vector search and BM25 retrieval using
+    Reciprocal Rank Fusion (RRF), followed by reranking.
+    """
 
-    def __init__(self, retrieval_service: RetrievalService, bm25_service: BM25Service) -> None:
+    RRF_K = 60
+
+    def __init__(
+        self,
+        retrieval_service: RetrievalService,
+        bm25_service: BM25Service,
+        reranking_service: RerankingService,
+    ) -> None:
         self.retrieval_service = retrieval_service
         self.bm25_service = bm25_service
+        self.reranking_service = reranking_service
 
     def search(
         self,
         query: str,
-        top_k: int = 3,
+        top_k: int = 5,
         collection: str | None = None,
     ) -> list[dict]:
-        """Performs hybrid retrieval with optional collection filtering."""
-        vector_results = self.retrieval_service.search(
-            query=query,
-            top_k=top_k,
-            collection=collection,
-        )
-        bm25_results = self.bm25_service.search(
-            query=query,
-            collection=collection,
-        )
-        return self._merge(vector_results, bm25_results)
+        """
+        Retrieves candidate documents using vector + BM25,
+        fuses rankings using RRF, then reranks the fused
+        candidates.
+        """
 
-    def _merge(self, vector_results: list[dict], bm25_results: list[dict]) -> list[dict]:
-        """Merges and deduplicates vector and BM25 results."""
-        seen = set()
-        merged = []
-        for result in vector_results + bm25_results:
+        vector_results = (
+            self.retrieval_service.search(
+                query=query,
+                top_k=top_k,
+                collection=collection,
+            )
+        )
+
+        bm25_results = (
+            self.bm25_service.search(
+                query=query,
+                collection=collection,
+            )
+        )
+
+        rrf_scores: dict[str, float] = {}
+        metadata_by_chunk: dict[str, dict] = {}
+
+        # -----------------------------------------------------
+        # VECTOR RESULTS
+        # -----------------------------------------------------
+
+        for rank, result in enumerate(
+            vector_results,
+            start=1,
+        ):
             chunk = result["chunk"]
-            if chunk not in seen:
-                seen.add(chunk)
-                merged.append(result)
-        return merged
+
+            score = (
+                1.0
+                / (self.RRF_K + rank)
+            )
+
+            rrf_scores[chunk] = (
+                rrf_scores.get(chunk, 0.0)
+                + score
+            )
+
+            metadata_by_chunk.setdefault(
+                chunk,
+                dict(result),
+            )
+
+        # -----------------------------------------------------
+        # BM25 RESULTS
+        # -----------------------------------------------------
+
+        for rank, result in enumerate(
+            bm25_results,
+            start=1,
+        ):
+            # Current BM25Service returns:
+            # (document_text, bm25_score)
+            if isinstance(result, tuple):
+                chunk = result[0]
+
+            elif isinstance(result, list):
+                chunk = result[0]
+
+            elif isinstance(result, dict):
+                chunk = result["chunk"]
+
+            else:
+                continue
+
+            score = (
+                1.0
+                / (self.RRF_K + rank)
+            )
+
+            rrf_scores[chunk] = (
+                rrf_scores.get(chunk, 0.0)
+                + score
+            )
+
+        # -----------------------------------------------------
+        # RRF ORDERING
+        # -----------------------------------------------------
+
+        fused = sorted(
+            rrf_scores.items(),
+            key=lambda item: item[1],
+            reverse=True,
+        )
+
+        # -----------------------------------------------------
+        # BUILD RERANK CANDIDATES
+        # -----------------------------------------------------
+
+        candidates: list[dict] = []
+
+        for chunk, rrf_score in fused:
+            result = dict(
+                metadata_by_chunk.get(
+                    chunk,
+                    {},
+                )
+            )
+
+            result["chunk"] = chunk
+            result["rrf_score"] = rrf_score
+
+            candidates.append(result)
+
+        # -----------------------------------------------------
+        # RERANK
+        # -----------------------------------------------------
+
+        reranked = (
+            self.reranking_service.rerank(
+                query=query,
+                chunks=candidates,
+                top_k=top_k,
+            )
+        )
+
+        # -----------------------------------------------------
+        # RESTORE METADATA
+        # -----------------------------------------------------
+
+        metadata_lookup = {
+            item["chunk"]: item
+            for item in candidates
+        }
+
+        final_results: list[dict] = []
+
+        for result in reranked:
+            chunk = result["chunk"]
+
+            original = metadata_lookup.get(
+                chunk,
+                {},
+            )
+
+            merged = {
+                **original,
+                **result,
+                "chunk": chunk,
+            }
+
+            final_results.append(
+                merged
+            )
+
+        return final_results

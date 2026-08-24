@@ -1,550 +1,641 @@
-import time
-
-from utils.logger import logger
-
-from auth.schemas import CurrentUser
-
-from models.ai_response import AIResponse
-from models.conversation_state import ConversationState
-from models.generated_itinerary import GeneratedItinerary
-
-from langchain_components.routing.intent_router import (
-    route_question,
-    execute_workflow,
-)
-
-from langchain_components.routing.intent_types import IntentType
-
-from langchain_components.routing.conversation_control import (
-    classify_conversation_control,
-)
-
-from langchain_components.routing.conversation_control_prompt import (
-    ConversationControl,
-)
-
-from core.dependencies import conversation_store
-
-from services.recommendation_session_service import (
-    recommendation_session_service,
-)
-
-from services.booking_session_service import (
-    booking_session_service,
-)
-
-from services.itinerary_session_service import (
-    itinerary_session_service,
-)
-
-from services.usage_tracking_service import (
-    usage_tracking_service,
-)
-
-from services.token_tracking_service import (
-    token_tracking_service,
-)
-
-from services.cost_estimation_service import (
-    cost_estimation_service,
-)
-
-from services.destination_visuals.service import (
-    destination_visual_service,
-)
-
-from config.settings import settings
+import json
+import sqlite3
+import os
+from datetime import datetime, UTC
 
 
-class ConversationManager:
-    """Central orchestration service for AI conversations."""
+class PersistentConversationStore:
+    """
+    SQLite-backed conversation store with booking, recommendation,
+    itinerary, and flight search session support.
+    """
 
-    def process_message(
-        self,
-        current_user: CurrentUser,
-        session_id: str,
-        question: str,
-    ) -> AIResponse:
-        state = self._build_state(
-            current_user,
-            session_id,
-            question,
-        )
+    def __init__(self, db_path: str = "data/conversations.db") -> None:
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        self.db_path = db_path
+        self._init_db()
 
-        result = self._execute_workflow(state)
+    def _connect(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(self.db_path)
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.row_factory = sqlite3.Row
+        return conn
 
-        self._track_usage(
-            current_user.user_id,
-            session_id,
-            result,
-        )
+    def _now(self) -> str:
+        return datetime.now(UTC).isoformat()
 
-        self._persist(
-            current_user.user_id,
-            session_id,
-            question,
-            result,
-        )
+    def _init_db(self) -> None:
+        """Creates all tables and indexes if they don't exist."""
+        with self._connect() as conn:
 
-        return self._build_response(
-            session_id,
-            result,
-        )
+            # =========================================================
+            # CONVERSATION SESSIONS
+            # =========================================================
 
-    # ---------------------------------------------------------
-    # PRIVATE METHODS
-    # ---------------------------------------------------------
-
-    def _build_state(
-        self,
-        current_user: CurrentUser,
-        session_id: str,
-        question: str,
-    ) -> ConversationState:
-        user_id = current_user.user_id
-
-        history = conversation_store.get_messages(
-            user_id=user_id,
-            session_id=session_id,
-        )
-
-        booking_details = (
-            booking_session_service.get_booking(
-                user_id=user_id,
-                session_id=session_id,
-            )
-        )
-
-        previous_recommendation = (
-            recommendation_session_service.get(
-                user_id=user_id,
-                session_id=session_id,
-            )
-        )
-
-        previous_itinerary = (
-            itinerary_session_service.get(
-                user_id=user_id,
-                session_id=session_id,
-            )
-        )
-
-        return ConversationState(
-            session_id=session_id,
-            user_id=user_id,
-            email=current_user.email,
-            role=current_user.role,
-            question=question,
-            history=history,
-            booking_details=booking_details,
-            recommendation_details=previous_recommendation,
-            itinerary_details=previous_itinerary,
-        )
-
-    def _execute_workflow(
-        self,
-        state: ConversationState,
-    ) -> dict:
-        start = time.perf_counter()
-
-        if state.booking_details:
-            result = self._handle_active_booking(state)
-
-        elif state.itinerary_details:
-            result = execute_workflow(
-                intent=IntentType.ITINERARY,
-                state=state.model_dump(),
-            )
-
-        else:
-            result = route_question(
-                state.model_dump()
-            )
-
-        latency = time.perf_counter() - start
-
-        logger.info(
-            "Intent=%s User=%s Session=%s Latency=%.2fms",
-            result.get("intent"),
-            state.user_id,
-            state.session_id,
-            latency * 1000,
-        )
-
-        return {
-            **result,
-            "latency": latency,
-        }
-
-    def _handle_active_booking(
-        self,
-        state: ConversationState,
-    ) -> dict:
-        """
-        There is an active booking in progress for this session.
-
-        Before routing to the booking workflow, check whether the
-        user's message is actually a control signal
-        (cancel/pause/interrupt) rather than a direct answer
-        to the current booking question.
-        """
-
-        control = classify_conversation_control(
-            state.question
-        )
-
-        logger.info(
-            "ConversationControl=%s User=%s Session=%s",
-            control,
-            state.user_id,
-            state.session_id,
-        )
-
-        # -----------------------------------------------------
-        # CANCEL
-        # -----------------------------------------------------
-
-        if control == ConversationControl.CANCEL:
-            return {
-                "answer": (
-                    "I've cancelled your booking request. "
-                    "How else can I help you?"
-                ),
-                "intent": IntentType.BOOKING,
-                "completed": True,
-                "cancelled": True,
-                "booking_details": None,
-            }
-
-        # -----------------------------------------------------
-        # PAUSE
-        # -----------------------------------------------------
-
-        if control == ConversationControl.PAUSE:
-            logger.warning(
-                "ConversationControl.PAUSE returned but not yet "
-                "supported (Stage 2 pending) — falling through "
-                "to booking workflow. User=%s Session=%s",
-                state.user_id,
-                state.session_id,
-            )
-
-            return execute_workflow(
-                intent=IntentType.BOOKING,
-                state=state.model_dump(),
-            )
-
-        # -----------------------------------------------------
-        # INTERRUPT
-        # -----------------------------------------------------
-
-        if control == ConversationControl.INTERRUPT:
-            faq_result = route_question(
-                state.model_dump()
-            )
-
-            if (
-                faq_result.get("intent")
-                == IntentType.BOOKING
-            ):
-                logger.warning(
-                    "INTERRUPT routing recursed back into BOOKING "
-                    "intent — using fallback response. "
-                    "User=%s Session=%s",
-                    state.user_id,
-                    state.session_id,
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS sessions (
+                    user_id     TEXT NOT NULL,
+                    session_id  TEXT NOT NULL,
+                    created_at  TEXT NOT NULL,
+                    last_active TEXT NOT NULL,
+                    PRIMARY KEY (user_id, session_id)
                 )
+            """)
 
-                return {
-                    "answer": (
-                        "Sorry, I couldn't find an answer to that "
-                        "right now. We were in the middle of your "
-                        "booking — would you like to continue?"
-                    ),
-                    "intent": IntentType.BOOKING,
-                    "completed": False,
-                }
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS messages (
+                    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id    TEXT NOT NULL,
+                    session_id TEXT NOT NULL,
+                    role       TEXT NOT NULL,
+                    content    TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY (user_id, session_id)
+                        REFERENCES sessions (user_id, session_id)
+                )
+            """)
 
-            faq_answer = faq_result.get(
-                "answer",
-                "",
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_messages_user_session
+                    ON messages (user_id, session_id)
+            """)
+
+            # =========================================================
+            # BOOKING SESSIONS
+            # =========================================================
+
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS booking_sessions (
+                    user_id      TEXT NOT NULL,
+                    session_id   TEXT NOT NULL,
+                    booking_data TEXT NOT NULL,
+                    updated_at   TEXT NOT NULL,
+                    PRIMARY KEY (user_id, session_id)
+                )
+            """)
+
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_booking_sessions
+                    ON booking_sessions (user_id, session_id)
+            """)
+
+            # =========================================================
+            # RECOMMENDATION SESSIONS
+            # =========================================================
+
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS recommendation_sessions (
+                    user_id             TEXT NOT NULL,
+                    session_id          TEXT NOT NULL,
+                    recommendation_data TEXT NOT NULL,
+                    updated_at          TEXT NOT NULL,
+                    PRIMARY KEY (user_id, session_id)
+                )
+            """)
+
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_recommendation_sessions
+                    ON recommendation_sessions (user_id, session_id)
+            """)
+
+            # =========================================================
+            # ITINERARY SESSIONS
+            # =========================================================
+
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS itinerary_sessions (
+                    user_id        TEXT NOT NULL,
+                    session_id     TEXT NOT NULL,
+                    itinerary_data TEXT NOT NULL,
+                    updated_at     TEXT NOT NULL,
+                    PRIMARY KEY (user_id, session_id)
+                )
+            """)
+
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_itinerary_sessions
+                    ON itinerary_sessions (user_id, session_id)
+            """)
+
+            # =========================================================
+            # FLIGHT SEARCH SESSIONS
+            # =========================================================
+
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS flight_search_sessions (
+                    user_id            TEXT NOT NULL,
+                    session_id         TEXT NOT NULL,
+                    flight_search_data TEXT NOT NULL,
+                    updated_at         TEXT NOT NULL,
+                    PRIMARY KEY (user_id, session_id)
+                )
+            """)
+
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_flight_search_sessions
+                    ON flight_search_sessions (user_id, session_id)
+            """)
+
+            # =========================================================
+            # USAGE LOGS
+            # =========================================================
+
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS usage_logs (
+                    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id    TEXT NOT NULL,
+                    session_id TEXT NOT NULL,
+                    intent     TEXT NOT NULL,
+                    latency    REAL NOT NULL,
+                    created_at TEXT NOT NULL
+                )
+            """)
+
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_usage_logs
+                    ON usage_logs (user_id, created_at)
+            """)
+
+            # =========================================================
+            # RATE LIMITS
+            # =========================================================
+
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS rate_limits (
+                    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id    TEXT NOT NULL,
+                    session_id TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                )
+            """)
+
+            # =========================================================
+            # TOKEN USAGE LOGS
+            # =========================================================
+
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS token_usage_logs (
+                    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id           TEXT NOT NULL,
+                    session_id        TEXT NOT NULL,
+                    intent            TEXT NOT NULL,
+                    model             TEXT NOT NULL,
+                    prompt_tokens     INTEGER NOT NULL,
+                    completion_tokens INTEGER NOT NULL,
+                    total_tokens      INTEGER NOT NULL,
+                    estimated_cost    REAL NOT NULL,
+                    created_at        TEXT NOT NULL
+                )
+            """)
+
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_token_logs
+                    ON token_usage_logs (user_id, created_at)
+            """)
+
+    # =========================================================
+    # SESSION / MESSAGE METHODS
+    # =========================================================
+
+    def session_exists(self, user_id: str, session_id: str) -> bool:
+        """Returns True if the session exists and belongs to this user."""
+        with self._connect() as conn:
+            row = conn.execute(
+                """
+                SELECT 1
+                FROM sessions
+                WHERE user_id = ? AND session_id = ?
+                """,
+                (user_id, session_id),
+            ).fetchone()
+
+        return row is not None
+
+    def add_message(
+        self,
+        user_id: str,
+        session_id: str,
+        role: str,
+        content: str,
+    ) -> None:
+        """Appends a message and creates the session row if needed."""
+        now = self._now()
+
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO sessions (
+                    user_id,
+                    session_id,
+                    created_at,
+                    last_active
+                )
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(user_id, session_id)
+                DO UPDATE SET last_active = ?
+                """,
+                (user_id, session_id, now, now, now),
             )
 
-            return {
-                **faq_result,
-                "answer": (
-                    f"{faq_answer}\n\n"
-                    "We were in the middle of your booking. "
-                    "Would you like to continue?"
+            conn.execute(
+                """
+                INSERT INTO messages (
+                    user_id,
+                    session_id,
+                    role,
+                    content,
+                    created_at
+                )
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (user_id, session_id, role, content, now),
+            )
+
+    def get_messages(
+        self,
+        user_id: str,
+        session_id: str,
+        max_messages: int = 10,
+    ) -> list[dict]:
+        """Returns the last N messages for the context window."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT role, content
+                FROM messages
+                WHERE user_id = ? AND session_id = ?
+                ORDER BY id DESC
+                LIMIT ?
+                """,
+                (user_id, session_id, max_messages),
+            ).fetchall()
+
+        return [dict(row) for row in reversed(rows)]
+
+    def get_session(
+        self,
+        user_id: str,
+        session_id: str,
+    ) -> list[dict]:
+        """Returns full conversation history."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT role, content
+                FROM messages
+                WHERE user_id = ? AND session_id = ?
+                ORDER BY id ASC
+                """,
+                (user_id, session_id),
+            ).fetchall()
+
+        return [dict(row) for row in rows]
+
+    def clear_session(
+        self,
+        user_id: str,
+        session_id: str,
+    ) -> None:
+        """Deletes the session and all its messages."""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                DELETE FROM messages
+                WHERE user_id = ? AND session_id = ?
+                """,
+                (user_id, session_id),
+            )
+
+            conn.execute(
+                """
+                DELETE FROM sessions
+                WHERE user_id = ? AND session_id = ?
+                """,
+                (user_id, session_id),
+            )
+
+    # =========================================================
+    # BOOKING SESSION METHODS
+    # =========================================================
+
+    def save_booking(
+        self,
+        user_id: str,
+        session_id: str,
+        booking_data: dict,
+    ) -> None:
+        """Persists booking details for a user's session."""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO booking_sessions (
+                    user_id,
+                    session_id,
+                    booking_data,
+                    updated_at
+                )
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(user_id, session_id) DO UPDATE SET
+                    booking_data = excluded.booking_data,
+                    updated_at = excluded.updated_at
+                """,
+                (
+                    user_id,
+                    session_id,
+                    json.dumps(booking_data),
+                    self._now(),
                 ),
-                "completed": False,
-            }
+            )
 
-        # -----------------------------------------------------
-        # NORMAL BOOKING FLOW
-        # -----------------------------------------------------
-
-        return execute_workflow(
-            intent=IntentType.BOOKING,
-            state=state.model_dump(),
-        )
-
-    def _track_usage(
+    def get_booking(
         self,
         user_id: str,
         session_id: str,
-        result: dict,
-    ) -> None:
-        usage_tracking_service.log_request(
-            user_id=user_id,
-            session_id=session_id,
-            intent=result.get(
-                "intent",
-                "UNKNOWN",
-            ),
-            latency=result["latency"],
-        )
+    ) -> dict:
+        """Returns persisted booking details."""
+        with self._connect() as conn:
+            row = conn.execute(
+                """
+                SELECT booking_data
+                FROM booking_sessions
+                WHERE user_id = ? AND session_id = ?
+                """,
+                (user_id, session_id),
+            ).fetchone()
 
-        token_usage = result.get(
-            "token_usage",
-            {},
-        )
+        return json.loads(row["booking_data"]) if row else {}
 
-        if not token_usage:
-            return
-
-        model = token_usage.get(
-            "model",
-            settings.OPENAI_MODEL,
-        )
-
-        prompt_tokens = token_usage.get(
-            "prompt_tokens",
-            0,
-        )
-
-        completion_tokens = token_usage.get(
-            "completion_tokens",
-            0,
-        )
-
-        token_tracking_service.log_usage(
-            user_id=user_id,
-            session_id=session_id,
-            intent=result.get(
-                "intent",
-                "UNKNOWN",
-            ),
-            model=model,
-            prompt_tokens=prompt_tokens,
-            completion_tokens=completion_tokens,
-            total_tokens=token_usage.get(
-                "total_tokens",
-                0,
-            ),
-            estimated_cost=cost_estimation_service.estimate(
-                prompt_tokens=prompt_tokens,
-                completion_tokens=completion_tokens,
-                model=model,
-            ),
-        )
-
-    def _persist(
+    def clear_booking(
         self,
         user_id: str,
         session_id: str,
-        question: str,
-        result: dict,
     ) -> None:
-        # -----------------------------------------------------
-        # BOOKING
-        # -----------------------------------------------------
-
-        if result.get("booking_details"):
-            booking_session_service.save_booking(
-                user_id=user_id,
-                session_id=session_id,
-                booking=result["booking_details"],
+        """Removes persisted booking details."""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                DELETE FROM booking_sessions
+                WHERE user_id = ? AND session_id = ?
+                """,
+                (user_id, session_id),
             )
 
-        # -----------------------------------------------------
-        # RECOMMENDATION
-        # -----------------------------------------------------
+    # =========================================================
+    # RECOMMENDATION SESSION METHODS
+    # =========================================================
 
-        if "recommendation_details" in result:
-            recommendation_session_service.save(
-                user_id=user_id,
-                session_id=session_id,
-                recommendation=result[
-                    "recommendation_details"
-                ],
-            )
-
-        # -----------------------------------------------------
-        # ITINERARY
-        # -----------------------------------------------------
-
-        if "itinerary_details" in result:
-            itinerary_session_service.save(
-                user_id=user_id,
-                session_id=session_id,
-                itinerary=result[
-                    "itinerary_details"
-                ],
-            )
-
-        # -----------------------------------------------------
-        # CLEAR COMPLETED SESSIONS
-        # -----------------------------------------------------
-
-        if result.get("completed"):
-            booking_session_service.clear_booking(
-                user_id=user_id,
-                session_id=session_id,
-            )
-
-            recommendation_session_service.clear(
-                user_id=user_id,
-                session_id=session_id,
-            )
-
-            itinerary_session_service.clear(
-                user_id=user_id,
-                session_id=session_id,
-            )
-
-        # -----------------------------------------------------
-        # CONVERSATION HISTORY
-        # -----------------------------------------------------
-
-        conversation_store.add_message(
-            user_id=user_id,
-            session_id=session_id,
-            role="user",
-            content=question,
-        )
-
-        conversation_store.add_message(
-            user_id=user_id,
-            session_id=session_id,
-            role="assistant",
-            content=result.get(
-                "answer",
-                "I was unable to generate a response.",
-            ),
-        )
-
-    def _build_response(
+    def save_recommendation(
         self,
+        user_id: str,
         session_id: str,
-        result: dict,
-    ) -> AIResponse:
-        """
-        Build the final API response.
-
-        For itinerary results, validate the generated itinerary
-        and enrich the destination with visual information.
-
-        For flight-search results, expose the structured flight
-        search request through response metadata so the frontend
-        can execute the existing flight-search flow.
-        """
-
-        metadata = dict(
-            result.get("metadata") or {}
-        )
-
-        intent = result.get("intent")
-
-        # -----------------------------------------------------
-        # ITINERARY VISUAL ENRICHMENT
-        # -----------------------------------------------------
-
-        is_itinerary = (
-            intent == IntentType.ITINERARY
-            or intent == IntentType.ITINERARY.value
-        )
-
-        if is_itinerary:
-            generated = result.get(
-                "generated_itinerary"
+        recommendation_data: dict,
+    ) -> None:
+        """Persists recommendation details."""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO recommendation_sessions (
+                    user_id,
+                    session_id,
+                    recommendation_data,
+                    updated_at
+                )
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(user_id, session_id) DO UPDATE SET
+                    recommendation_data = excluded.recommendation_data,
+                    updated_at = excluded.updated_at
+                """,
+                (
+                    user_id,
+                    session_id,
+                    json.dumps(recommendation_data),
+                    self._now(),
+                ),
             )
 
-            itinerary_details = result.get(
-                "itinerary_details"
+    def get_recommendation(
+        self,
+        user_id: str,
+        session_id: str,
+    ) -> dict:
+        """Returns persisted recommendation details."""
+        with self._connect() as conn:
+            row = conn.execute(
+                """
+                SELECT recommendation_data
+                FROM recommendation_sessions
+                WHERE user_id = ? AND session_id = ?
+                """,
+                (user_id, session_id),
+            ).fetchone()
+
+        return json.loads(row["recommendation_data"]) if row else {}
+
+    def clear_recommendation(
+        self,
+        user_id: str,
+        session_id: str,
+    ) -> None:
+        """Removes persisted recommendation details."""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                DELETE FROM recommendation_sessions
+                WHERE user_id = ? AND session_id = ?
+                """,
+                (user_id, session_id),
             )
 
-            if generated and itinerary_details:
-                try:
-                    generated_itinerary = (
-                        GeneratedItinerary.model_validate(
-                            generated
-                        )
-                    )
+    # =========================================================
+    # ITINERARY SESSION METHODS
+    # =========================================================
 
-                    destination = itinerary_details.get(
-                        "destination"
-                    )
-
-                    if destination:
-                        visuals = (
-                            destination_visual_service.enrich(
-                                destination=destination,
-                                itinerary=generated_itinerary,
-                            )
-                        )
-
-                        metadata["visuals"] = (
-                            visuals.model_dump()
-                        )
-
-                except Exception:
-                    logger.exception(
-                        "Destination visual enrichment failed "
-                        "session=%s",
-                        session_id,
-                    )
-
-        # -----------------------------------------------------
-        # FLIGHT SEARCH METADATA
-        # -----------------------------------------------------
-
-        flight_search = result.get(
-            "flight_search"
-        )
-
-        if flight_search:
-            metadata["flight_search"] = (
-                flight_search
+    def save_itinerary(
+        self,
+        user_id: str,
+        session_id: str,
+        itinerary_data: dict,
+    ) -> None:
+        """Persists itinerary details."""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO itinerary_sessions (
+                    user_id,
+                    session_id,
+                    itinerary_data,
+                    updated_at
+                )
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(user_id, session_id) DO UPDATE SET
+                    itinerary_data = excluded.itinerary_data,
+                    updated_at = excluded.updated_at
+                """,
+                (
+                    user_id,
+                    session_id,
+                    json.dumps(itinerary_data),
+                    self._now(),
+                ),
             )
 
-        # -----------------------------------------------------
-        # NORMALIZE INTENT
-        # -----------------------------------------------------
+    def get_itinerary(
+        self,
+        user_id: str,
+        session_id: str,
+    ) -> dict:
+        """Returns persisted itinerary details."""
+        with self._connect() as conn:
+            row = conn.execute(
+                """
+                SELECT itinerary_data
+                FROM itinerary_sessions
+                WHERE user_id = ? AND session_id = ?
+                """,
+                (user_id, session_id),
+            ).fetchone()
 
-        if isinstance(
-            intent,
-            IntentType,
-        ):
-            intent = intent.value
+        return json.loads(row["itinerary_data"]) if row else {}
 
-        # -----------------------------------------------------
-        # FINAL RESPONSE
-        # -----------------------------------------------------
+    def clear_itinerary(
+        self,
+        user_id: str,
+        session_id: str,
+    ) -> None:
+        """Removes persisted itinerary details."""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                DELETE FROM itinerary_sessions
+                WHERE user_id = ? AND session_id = ?
+                """,
+                (user_id, session_id),
+            )
 
-        return AIResponse(
-            session_id=session_id,
-            answer=result.get(
-                "answer",
-                "I was unable to generate a response.",
-            ),
-            intent=intent,
-            completed=result.get(
-                "completed",
-                False,
-            ),
-            metadata=metadata or None,
+    # =========================================================
+    # FLIGHT SEARCH SESSION METHODS
+    # =========================================================
+
+    def save_flight_search(
+        self,
+        user_id: str,
+        session_id: str,
+        flight_search_data: dict,
+    ) -> None:
+        """Persists flight-search details for a user's session."""
+        with self._connect() as conn:
+            conn.execute("""
+                INSERT INTO flight_search_sessions (
+                    user_id,
+                    session_id,
+                    flight_search_data,
+                    updated_at
+                )
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(user_id, session_id) DO UPDATE SET
+                    flight_search_data = excluded.flight_search_data,
+                    updated_at = excluded.updated_at
+            """, (
+                user_id,
+                session_id,
+                json.dumps(flight_search_data),
+                self._now(),
+            ))
+
+    def get_flight_search(
+        self,
+        user_id: str,
+        session_id: str,
+    ) -> dict:
+        """Returns persisted flight-search details."""
+        with self._connect() as conn:
+            row = conn.execute(
+                """
+                SELECT flight_search_data
+                FROM flight_search_sessions
+                WHERE user_id = ?
+                  AND session_id = ?
+                """,
+                (user_id, session_id),
+            ).fetchone()
+
+        return (
+            json.loads(row["flight_search_data"])
+            if row
+            else {}
         )
 
+    def clear_flight_search(
+        self,
+        user_id: str,
+        session_id: str,
+    ) -> None:
+        """Removes persisted flight-search details."""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                DELETE FROM flight_search_sessions
+                WHERE user_id = ?
+                  AND session_id = ?
+                """,
+                (user_id, session_id),
+            )
 
-conversation_manager = ConversationManager()
+    # =========================================================
+    # USER SESSION METHODS
+    # =========================================================
+
+    def get_user_sessions(self, user_id: str) -> list[dict]:
+        """Returns all sessions for a user, most recently active first."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT session_id, created_at, last_active
+                FROM sessions
+                WHERE user_id = ?
+                ORDER BY last_active DESC
+                """,
+                (user_id,),
+            ).fetchall()
+
+        return [dict(row) for row in rows]
+
+    def delete_session(
+        self,
+        user_id: str,
+        session_id: str,
+    ) -> None:
+        """Deletes a conversation and all its messages."""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                DELETE FROM messages
+                WHERE user_id = ? AND session_id = ?
+                """,
+                (user_id, session_id),
+            )
+
+            conn.execute(
+                """
+                DELETE FROM sessions
+                WHERE user_id = ? AND session_id = ?
+                """,
+                (user_id, session_id),
+            )
+
+    def touch_session(
+        self,
+        user_id: str,
+        session_id: str,
+    ) -> None:
+        """Updates the last activity timestamp for a session."""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                UPDATE sessions
+                SET last_active = ?
+                WHERE user_id = ? AND session_id = ?
+                """,
+                (self._now(), user_id, session_id),
+            )
