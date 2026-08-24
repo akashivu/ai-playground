@@ -60,6 +60,7 @@ class ConversationManager:
             history=history,
             booking_details=booking_details,
             recommendation_details=previous_recommendation,
+            itinerary_details={},
         )
 
     def _execute_workflow(self, state: ConversationState) -> dict:
