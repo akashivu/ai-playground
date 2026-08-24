@@ -13,4 +13,5 @@ ENABLED_INTENTS = [
     IntentType.ITINERARY,
     IntentType.BOOKING_STATUS,
     IntentType.OUT_OF_DOMAIN,
+    IntentType.FLIGHT_SEARCH,
 ]
