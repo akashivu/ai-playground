@@ -18,6 +18,10 @@ from langchain_components.workflows.recommendation_workflow import (
     recommendation_workflow,
 )
 
+from langchain_components.workflows.destination_info_workflow import (
+    destination_info_workflow,
+)
+
 from langchain_components.workflows.knowledge_search_workflow import (
     knowledge_search_workflow,
 )
@@ -55,6 +59,9 @@ WORKFLOWS: dict[IntentType, Callable] = {
     IntentType.BOOKING_STATUS: booking_status_workflow,
 
     IntentType.RECOMMENDATION: recommendation_workflow,
+
+    
+    IntentType.DESTINATION_INFO: destination_info_workflow,
 
     IntentType.KNOWLEDGE_SEARCH: knowledge_search_workflow,
 
