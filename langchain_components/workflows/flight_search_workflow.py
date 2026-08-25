@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from datetime import date
 from langchain_components.chains.flight_search_extraction_chain import (
     flight_search_extraction_chain,
     flight_search_parser,
@@ -98,17 +98,12 @@ def flight_search_workflow(
         )
     )
 
-    extracted = (
-        flight_search_extraction_chain.invoke(
-            {
-                "question": state["question"],
-                "format_instructions": (
-                    flight_search_parser
-                    .get_format_instructions()
-                ),
-            }
-        )
-    )
+    extracted = flight_search_extraction_chain.invoke(
+    {
+        "question": state["question"],
+        "current_date": date.today().isoformat(),
+    }
+)
 
     extracted_data = (
         extracted.model_dump()
