@@ -2,7 +2,6 @@ from __future__ import annotations
 from datetime import date
 from langchain_components.chains.flight_search_extraction_chain import (
     flight_search_extraction_chain,
-    flight_search_parser,
 )
 
 from langchain_components.registry.workflow_decorator import (
