@@ -35,10 +35,15 @@ class HybridRetrievalService:
         candidates.
         """
 
+        candidate_k = max(
+            top_k * 3,
+            10,
+        )
+
         vector_results = (
             self.retrieval_service.search(
                 query=query,
-                top_k=top_k,
+                top_k=candidate_k,
                 collection=collection,
             )
         )
@@ -46,6 +51,7 @@ class HybridRetrievalService:
         bm25_results = (
             self.bm25_service.search(
                 query=query,
+                top_k=candidate_k,
                 collection=collection,
             )
         )
@@ -86,18 +92,14 @@ class HybridRetrievalService:
             bm25_results,
             start=1,
         ):
-            # Current BM25Service returns:
-            # (document_text, bm25_score)
-            if isinstance(result, tuple):
-                chunk = result[0]
+            # BM25Service returns structured dictionaries.
 
-            elif isinstance(result, list):
-                chunk = result[0]
+            if not isinstance(result, dict):
+                continue
 
-            elif isinstance(result, dict):
-                chunk = result["chunk"]
+            chunk = result.get("chunk")
 
-            else:
+            if not chunk:
                 continue
 
             score = (
@@ -108,6 +110,11 @@ class HybridRetrievalService:
             rrf_scores[chunk] = (
                 rrf_scores.get(chunk, 0.0)
                 + score
+            )
+
+            metadata_by_chunk.setdefault(
+                chunk,
+                dict(result),
             )
 
         # -----------------------------------------------------
